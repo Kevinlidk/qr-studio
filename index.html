@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="zh-CN" data-theme="dark" data-lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>QR Studio — Generate & Brand QR Codes</title>
+<title>QR Studio — 二维码生成与品牌定制工具</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js">setLang('zh');
+</script>
 <link rel="prefetch" href="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js" as="script">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -24,7 +25,12 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
 .hdr h1{font-family:'JetBrains Mono',monospace;font-size:clamp(1.6rem,4vw,2.2rem);font-weight:600;letter-spacing:-.04em;margin-bottom:6px}
 .hdr h1 span{color:var(--accent)}
 .hdr p{color:var(--text2);font-size:.88rem}
-.theme-toggle{position:absolute;top:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px;display:flex;gap:2px}
+.hdr-controls{position:absolute;top:0;right:0;display:flex;align-items:center;gap:8px}
+.lang-toggle{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px;display:flex;gap:2px}
+.lang-toggle button{height:32px;padding:0 12px;border:none;border-radius:16px;background:transparent;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--text2);transition:all .2s;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.lang-toggle button.on{background:var(--accent);color:#fff}
+.lang-toggle button:not(.on):hover{color:var(--text);background:var(--surface2)}
+.theme-toggle{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px;display:flex;gap:2px}
 .theme-toggle button{width:32px;height:32px;border:none;border-radius:50%;background:transparent;cursor:pointer;font-size:1rem;color:var(--text3);transition:all .2s;display:flex;align-items:center;justify-content:center}
 .theme-toggle button.on{background:var(--accent);color:#fff}
 .mode-bar{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:28px}
@@ -129,7 +135,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 @keyframes spin{to{transform:rotate(360deg)}}
 .footer{margin-top:auto;padding:20px;text-align:center;font-size:.72rem;color:var(--text3);border-top:1px solid var(--border);line-height:1.8}
 .footer a{color:var(--text2);text-decoration:none}.footer a:hover{color:var(--accent)}
-@media(max-width:600px){.shell{padding:16px 14px 48px}.hdr{padding:28px 0 20px}.r2,.r3{grid-template-columns:1fr 1fr}.card{padding:16px}.type-pills{gap:5px}.pill{padding:6px 11px;font-size:.74rem}.qr-tmpl-frame,.qr-frame{max-width:100%}.theme-toggle{position:static;margin:0 auto 12px;width:fit-content}.hdr{padding-top:8px}.phone-row select{width:100px}.tip .tip-text{width:220px;left:0;transform:none}}
+@media(max-width:600px){.shell{padding:16px 14px 48px}.hdr{padding:28px 0 20px}.r2,.r3{grid-template-columns:1fr 1fr}.card{padding:16px}.type-pills{gap:5px}.pill{padding:6px 11px;font-size:.74rem}.qr-tmpl-frame,.qr-frame{max-width:100%}.hdr-controls{position:static;margin:0 auto 12px;width:fit-content;justify-content:center}.theme-toggle{position:static;margin:0;width:fit-content}.hdr{padding-top:8px}.phone-row select{width:100px}.tip .tip-text{width:220px;left:0;transform:none}}
 .party-mode .hdr h1{animation:rainbow 2s linear infinite}
 .party-mode .card,.party-mode .mode-bar{border-image:linear-gradient(90deg,#ec4899,#f59e0b,#22c55e,#3b82f6,#8b5cf6,#ec4899) 1;animation:borderShift 3s linear infinite}
 .party-mode .gen-btn,.party-mode .mode-btn.on{animation:btnPulse 1s ease-in-out infinite alternate}
@@ -141,101 +147,107 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <body>
 <div class="shell">
   <div class="hdr">
-    <div class="theme-toggle">
-      <button onclick="setTheme('light')" id="theme-light">☀️</button>
-      <button class="on" onclick="setTheme('dark')" id="theme-dark">🌙</button>
+    <div class="hdr-controls">
+      <div class="lang-toggle" id="lang-toggle" role="group" aria-label="语言切换 / Language Switch">
+        <button class="on" onclick="handleLangClick('zh')" id="lang-zh" title="切换为中文">中文</button>
+        <button onclick="handleLangClick('en')" id="lang-en" title="Switch to English">English</button>
+      </div>
+      <div class="theme-toggle">
+        <button onclick="setTheme('light')" id="theme-light" title="浅色模式">☀️</button>
+        <button class="on" onclick="setTheme('dark')" id="theme-dark" title="深色模式">🌙</button>
+      </div>
     </div>
     <h1>QR <span>Studio</span></h1>
-    <p>Standard & branded QR codes, zero bloat</p>
+    <p data-i18n="hdr_sub">标准与品牌定制二维码，纯净无冗余</p>
   </div>
   <div class="mode-bar">
-    <button class="mode-btn on" data-mode="standard" onclick="setMode('standard')">Standard<span class="sub">Classic QR codes</span></button>
-    <button class="mode-btn" data-mode="chroma" onclick="setMode('chroma')">ChromaCode<span class="sub">Image-blended mosaic</span></button>
-    <button class="mode-btn" data-mode="scanner" onclick="setMode('scanner')">Scanner<span class="sub">Read & decode QR</span></button>
+    <button class="mode-btn on" data-mode="standard" onclick="setMode('standard')"><span data-i18n="mode_std">标准模式</span><span class="sub" data-i18n="mode_std_sub">经典二维码生成</span></button>
+    <button class="mode-btn" data-mode="chroma" onclick="setMode('chroma')"><span data-i18n="mode_cc">炫彩码</span><span class="sub" data-i18n="mode_cc_sub">图像融合马赛克艺术码</span></button>
+    <button class="mode-btn" data-mode="scanner" onclick="setMode('scanner')"><span data-i18n="mode_scan">扫码识别</span><span class="sub" data-i18n="mode_scan_sub">读取与解析二维码</span></button>
   </div>
 
   <!-- ══════ STANDARD ══════ -->
   <div class="sec on" id="sec-standard">
     <div class="type-pills" id="type-pills">
-      <div class="pill on" data-type="url">URL</div><div class="pill" data-type="text">Text</div><div class="pill" data-type="wifi">WiFi</div><div class="pill" data-type="email">Email</div><div class="pill" data-type="phone">Phone</div><div class="pill" data-type="sms">SMS</div><div class="pill" data-type="whatsapp">WhatsApp</div><div class="pill" data-type="location">Location</div><div class="pill" data-type="calendar">Calendar</div><div class="pill" data-type="vcard">vCard</div><div class="pill" data-type="duitnow" style="background:linear-gradient(135deg,#ED2E67,#c4235a);color:#fff;border-color:#ED2E67">🇲🇾 DuitNow</div>
+      <div class="pill on" data-type="url" data-i18n="pill_url">网址</div><div class="pill" data-type="text" data-i18n="pill_text">文本</div><div class="pill" data-type="wifi" data-i18n="pill_wifi">WiFi</div><div class="pill" data-type="email" data-i18n="pill_email">邮箱</div><div class="pill" data-type="phone" data-i18n="pill_phone">电话</div><div class="pill" data-type="sms" data-i18n="pill_sms">短信</div><div class="pill" data-type="whatsapp" data-i18n="pill_whatsapp">WhatsApp</div><div class="pill" data-type="location" data-i18n="pill_location">位置</div><div class="pill" data-type="calendar" data-i18n="pill_calendar">日程</div><div class="pill" data-type="vcard" data-i18n="pill_vcard">名片 (vCard)</div><div class="pill" data-type="duitnow" style="background:linear-gradient(135deg,#ED2E67,#c4235a);color:#fff;border-color:#ED2E67">🇲🇾 DuitNow</div>
     </div>
     <div class="card">
       <div class="dp on" id="dp-url"><div class="field"><input class="inp" id="in-url" placeholder="https://example.com" spellcheck="false"><div class="val-msg" id="v-url"></div></div></div>
-      <div class="dp" id="dp-text"><div class="field"><textarea class="inp" id="in-text" placeholder="Enter any text or message…"></textarea></div></div>
+      <div class="dp" id="dp-text"><div class="field"><textarea class="inp" id="in-text" data-i18n-ph="ph_in_text" placeholder="请输入任意文本或消息内容…"></textarea></div></div>
       <div class="dp" id="dp-wifi">
-        <div class="field"><label>Network name (SSID)</label><input class="inp" id="wifi-ssid" placeholder="MyWiFi"><div class="val-msg" id="v-wifi-ssid"></div></div>
-        <div class="field"><label>Password</label><div style="position:relative"><input class="inp" id="wifi-pass" type="password" placeholder="Min 8 characters" style="padding-right:42px"><button type="button" id="wifi-eye" onclick="toggleWifiEye()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:4px;line-height:1">👁️‍🗨️</button></div><div class="val-msg" id="v-wifi-pass"></div></div>
-        <div class="row r2"><div class="field"><label>Encryption</label><select class="inp" id="wifi-enc"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="">None</option></select></div><div class="field" style="display:flex;align-items:flex-end;padding-bottom:2px"><label class="chk"><input type="checkbox" id="wifi-hidden"> Hidden network</label></div></div>
-        <hr class="sep"><div class="card-title">Display below QR code</div>
-        <div class="row r3"><div class="field"><label class="chk"><input type="checkbox" id="wifi-show-ssid" checked> Show SSID</label></div><div class="field"><label class="chk"><input type="checkbox" id="wifi-show-pass"> Show Password</label></div><div class="field"><label class="chk"><input type="checkbox" id="wifi-show-enc"> Show Encryption</label></div></div>
+        <div class="field"><label data-i18n="lbl_wifi_ssid">网络名称 (SSID)</label><input class="inp" id="wifi-ssid" placeholder="MyWiFi"><div class="val-msg" id="v-wifi-ssid"></div></div>
+        <div class="field"><label data-i18n="lbl_wifi_pass">密码</label><div style="position:relative"><input class="inp" id="wifi-pass" type="password" data-i18n-ph="ph_wifi_pass" placeholder="至少 8 个字符" style="padding-right:42px"><button type="button" id="wifi-eye" onclick="toggleWifiEye()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:4px;line-height:1">👁️‍🗨️</button></div><div class="val-msg" id="v-wifi-pass"></div></div>
+        <div class="row r2"><div class="field"><label data-i18n="lbl_wifi_enc">加密方式</label><select class="inp" id="wifi-enc"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="" data-i18n="opt_wifi_none">无密码</option></select></div><div class="field" style="display:flex;align-items:flex-end;padding-bottom:2px"><label class="chk"><input type="checkbox" id="wifi-hidden"> <span data-i18n="chk_wifi_hidden">隐藏网络</span></label></div></div>
+        <hr class="sep"><div class="card-title" data-i18n="title_wifi_below">在二维码下方显示信息</div>
+        <div class="row r3"><div class="field"><label class="chk"><input type="checkbox" id="wifi-show-ssid" checked> <span data-i18n="chk_wifi_show_ssid">显示 SSID</span></label></div><div class="field"><label class="chk"><input type="checkbox" id="wifi-show-pass"> <span data-i18n="chk_wifi_show_pass">显示密码</span></label></div><div class="field"><label class="chk"><input type="checkbox" id="wifi-show-enc"> <span data-i18n="chk_wifi_show_enc">显示加密方式</span></label></div></div>
       </div>
-      <div class="dp" id="dp-email"><div class="field"><label>Email address</label><input class="inp" id="em-to" placeholder="hello@example.com"><div class="val-msg" id="v-em-to"></div></div><div class="field"><label>Subject</label><input class="inp" id="em-sub" placeholder="Subject line"></div><div class="field"><label>Body</label><textarea class="inp" id="em-body" placeholder="Email body…"></textarea></div></div>
-      <div class="dp" id="dp-phone"><div class="field"><label>Phone number</label><div class="phone-row"><select class="inp" id="ph-cc"></select><input class="inp" id="in-phone" placeholder="555 123 4567"></div><div class="val-msg" id="v-phone"></div></div></div>
-      <div class="dp" id="dp-sms"><div class="field"><label>Phone number</label><div class="phone-row"><select class="inp" id="sms-cc"></select><input class="inp" id="sms-phone" placeholder="555 123 4567"></div><div class="val-msg" id="v-sms-phone"></div></div><div class="field"><label>Message (optional)</label><textarea class="inp" id="sms-msg" placeholder="Pre-filled SMS text…"></textarea></div></div>
-      <div class="dp" id="dp-whatsapp"><div class="field"><label>Phone number</label><div class="phone-row"><select class="inp" id="wa-cc"></select><input class="inp" id="wa-phone" placeholder="5551234567"></div><div class="val-msg" id="v-wa-phone"></div></div><div class="field"><label>Pre-filled message (optional)</label><textarea class="inp" id="wa-msg" placeholder="Hi! I saw your site…"></textarea></div></div>
-      <div class="dp" id="dp-location"><div class="field"><label>Location name or address</label><input class="inp" id="loc-name" placeholder="Eiffel Tower, Paris"><div class="val-msg" id="v-loc"></div></div><div class="row r2"><div class="field"><label>Latitude</label><input class="inp" id="loc-lat" placeholder="48.8584"></div><div class="field"><label>Longitude</label><input class="inp" id="loc-lng" placeholder="2.2945"></div></div></div>
-      <div class="dp" id="dp-calendar"><div class="field"><label>Event title</label><input class="inp" id="cal-title" placeholder="Team Meeting"><div class="val-msg" id="v-cal-title"></div></div><div class="field"><label>Description</label><textarea class="inp" id="cal-desc" placeholder="Agenda…"></textarea></div><div class="field"><label>Location</label><input class="inp" id="cal-loc" placeholder="Conference Room A"></div><div class="row r2"><div class="field"><label>Start date</label><input class="inp" type="date" id="cal-sd"><div class="val-msg" id="v-cal-sd"></div></div><div class="field"><label>Start time</label><input class="inp" type="time" id="cal-st"></div></div><div class="row r2"><div class="field"><label>End date</label><input class="inp" type="date" id="cal-ed"></div><div class="field"><label>End time</label><input class="inp" type="time" id="cal-et"></div></div><div class="field"><label class="chk"><input type="checkbox" id="cal-allday"> All-day event</label></div></div>
-      <div class="dp" id="dp-vcard"><div class="row r2"><div class="field"><label>First name</label><input class="inp" id="vc-fn" placeholder="Jane"></div><div class="field"><label>Last name</label><input class="inp" id="vc-ln" placeholder="Smith"></div></div><div class="val-msg" id="v-vc-name"></div><div class="field"><label>Phone</label><div class="phone-row"><select class="inp" id="vc-cc"></select><input class="inp" id="vc-phone" placeholder="555 123 4567"></div></div><div class="field"><label>Email</label><input class="inp" id="vc-email" placeholder="jane@example.com"><div class="val-msg" id="v-vc-email"></div></div><div class="field"><label>Organization</label><input class="inp" id="vc-org" placeholder="Acme Inc."></div><div class="field"><label>Website</label><input class="inp" id="vc-url" placeholder="https://example.com"><div class="val-msg" id="v-vc-url"></div></div></div>
+      <div class="dp" id="dp-email"><div class="field"><label data-i18n="lbl_em_to">邮箱地址</label><input class="inp" id="em-to" placeholder="hello@example.com"><div class="val-msg" id="v-em-to"></div></div><div class="field"><label data-i18n="lbl_em_sub">邮件主题</label><input class="inp" id="em-sub" data-i18n-ph="ph_em_sub" placeholder="请输入邮件主题"></div><div class="field"><label data-i18n="lbl_em_body">邮件正文</label><textarea class="inp" id="em-body" data-i18n-ph="ph_em_body" placeholder="请输入邮件正文…"></textarea></div></div>
+      <div class="dp" id="dp-phone"><div class="field"><label data-i18n="lbl_phone">电话号码</label><div class="phone-row"><select class="inp" id="ph-cc"></select><input class="inp" id="in-phone" placeholder="555 123 4567"></div><div class="val-msg" id="v-phone"></div></div></div>
+      <div class="dp" id="dp-sms"><div class="field"><label data-i18n="lbl_phone">电话号码</label><div class="phone-row"><select class="inp" id="sms-cc"></select><input class="inp" id="sms-phone" placeholder="555 123 4567"></div><div class="val-msg" id="v-sms-phone"></div></div><div class="field"><label data-i18n="lbl_sms_msg">短信内容（可选）</label><textarea class="inp" id="sms-msg" data-i18n-ph="ph_sms_msg" placeholder="预填短信文本…"></textarea></div></div>
+      <div class="dp" id="dp-whatsapp"><div class="field"><label data-i18n="lbl_phone">电话号码</label><div class="phone-row"><select class="inp" id="wa-cc"></select><input class="inp" id="wa-phone" placeholder="5551234567"></div><div class="val-msg" id="v-wa-phone"></div></div><div class="field"><label data-i18n="lbl_wa_msg">预填消息（可选）</label><textarea class="inp" id="wa-msg" data-i18n-ph="ph_wa_msg" placeholder="您好！我看到了您的网站…"></textarea></div></div>
+      <div class="dp" id="dp-location"><div class="field"><label data-i18n="lbl_loc_name">地点名称或地址</label><input class="inp" id="loc-name" data-i18n-ph="ph_loc_name" placeholder="巴黎埃菲尔铁塔"><div class="val-msg" id="v-loc"></div></div><div class="row r2"><div class="field"><label data-i18n="lbl_loc_lat">纬度</label><input class="inp" id="loc-lat" placeholder="48.8584"></div><div class="field"><label data-i18n="lbl_loc_lng">经度</label><input class="inp" id="loc-lng" placeholder="2.2945"></div></div></div>
+      <div class="dp" id="dp-calendar"><div class="field"><label data-i18n="lbl_cal_title">日程标题</label><input class="inp" id="cal-title" data-i18n-ph="ph_cal_title" placeholder="团队会议"><div class="val-msg" id="v-cal-title"></div></div><div class="field"><label data-i18n="lbl_cal_desc">日程描述</label><textarea class="inp" id="cal-desc" data-i18n-ph="ph_cal_desc" placeholder="会议议程…"></textarea></div><div class="field"><label data-i18n="lbl_cal_loc">地点</label><input class="inp" id="cal-loc" data-i18n-ph="ph_cal_loc" placeholder="A 会议室"></div><div class="row r2"><div class="field"><label data-i18n="lbl_cal_sd">开始日期</label><input class="inp" type="date" id="cal-sd"><div class="val-msg" id="v-cal-sd"></div></div><div class="field"><label data-i18n="lbl_cal_st">开始时间</label><input class="inp" type="time" id="cal-st"></div></div><div class="row r2"><div class="field"><label data-i18n="lbl_cal_ed">结束日期</label><input class="inp" type="date" id="cal-ed"></div><div class="field"><label data-i18n="lbl_cal_et">结束时间</label><input class="inp" type="time" id="cal-et"></div></div><div class="field"><label class="chk"><input type="checkbox" id="cal-allday"> <span data-i18n="chk_cal_allday">全天日程</span></label></div></div>
+      <div class="dp" id="dp-vcard"><div class="row r2"><div class="field"><label data-i18n="lbl_vc_fn">名字</label><input class="inp" id="vc-fn" data-i18n-ph="ph_vc_fn" placeholder="小明"></div><div class="field"><label data-i18n="lbl_vc_ln">姓氏</label><input class="inp" id="vc-ln" data-i18n-ph="ph_vc_ln" placeholder="张"></div></div><div class="val-msg" id="v-vc-name"></div><div class="field"><label data-i18n="lbl_vc_phone">电话</label><div class="phone-row"><select class="inp" id="vc-cc"></select><input class="inp" id="vc-phone" placeholder="555 123 4567"></div></div><div class="field"><label data-i18n="lbl_vc_email">邮箱</label><input class="inp" id="vc-email" placeholder="jane@example.com"><div class="val-msg" id="v-vc-email"></div></div><div class="field"><label data-i18n="lbl_vc_org">公司 / 组织</label><input class="inp" id="vc-org" data-i18n-ph="ph_vc_org" placeholder="示例科技有限公司"></div><div class="field"><label data-i18n="lbl_vc_url">网站</label><input class="inp" id="vc-url" placeholder="https://example.com"><div class="val-msg" id="v-vc-url"></div></div></div>
       <div class="dp" id="dp-duitnow">
-        <div style="font-size:.78rem;color:var(--text2);margin-bottom:14px;line-height:1.55;padding:10px 14px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border)">
-          <span style="color:#ED2E67;font-weight:600">🇲🇾 DuitNow QR Generator</span> — Builds structurally valid EMV QR strings per <a href="https://docs.developer.paynet.my/docs/duitNow-QR/integration/QR-generation-specification/merchant-presented-mode/qr-data-object" target="_blank" style="color:var(--accent);text-decoration:none">PayNet QR Spec v1.5</a>.
+        <div id="i18n-dn-intro" style="font-size:.78rem;color:var(--text2);margin-bottom:14px;line-height:1.55;padding:10px 14px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border)">
+          <span style="color:#ED2E67;font-weight:600">🇲🇾 DuitNow 二维码生成器</span> — 根据 <a href="https://docs.developer.paynet.my/docs/duitNow-QR/integration/QR-generation-specification/merchant-presented-mode/qr-data-object" target="_blank" style="color:var(--accent);text-decoration:none">PayNet QR 规范 v1.5</a> 构建结构合规的 EMV 二维码字符串。
           <div style="margin-top:8px;padding:8px 12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:8px;font-size:.72rem;color:var(--warn)">
-            <strong>⚠ This won't process real payments.</strong> The Merchant/QR ID must be a real ID registered with an acquirer bank through PayNet. Generated QR codes have correct format & CRC but are not recognized by the payment network. Useful for developers testing EMV parsers or learning how DuitNow QR is structured. See <a href="https://github.com/natsu90/emvqr/issues/1" target="_blank" style="color:var(--warn);text-decoration:underline">natsu90's research</a>.
+            <strong>⚠ 此二维码不可用于真实收款。</strong> 商户/二维码 ID 必须是通过 PayNet 在收单银行注册的真实 ID。生成的二维码具有正确的格式和 CRC 校验码，但不会被支付网络识别，仅供开发者测试 EMV 解析器或了解 DuitNow 二维码结构。详见 <a href="https://github.com/natsu90/emvqr/issues/1" target="_blank" style="color:var(--warn);text-decoration:underline">natsu90 的研究</a>。
           </div>
         </div>
-        <div class="field"><label>QR Type</label>
-          <div style="display:flex;gap:6px"><button class="pill on dn-gen-type" data-v="11" onclick="setDnGenType('11')">Static (reusable)</button><button class="pill dn-gen-type" data-v="12" onclick="setDnGenType('12')">Dynamic (one-time)</button></div>
+        <div class="field"><label data-i18n="lbl_dn_qrtype">二维码类型</label>
+          <div style="display:flex;gap:6px"><button class="pill on dn-gen-type" data-v="11" onclick="setDnGenType('11')" data-i18n="btn_dn_static">静态码（可重复使用）</button><button class="pill dn-gen-type" data-v="12" onclick="setDnGenType('12')" data-i18n="btn_dn_dynamic">动态码（一次性）</button></div>
         </div>
-        <div class="field"><label>Acquirer / Bank <span style="color:#ED2E67">*</span></label>
+        <div class="field"><label><span data-i18n="lbl_dn_acquirer">收单机构 / 银行</span> <span style="color:#ED2E67">*</span></label>
           <select class="inp" id="dn-gen-acquirer">
-            <option value="">— Select acquirer —</option>
+            <option value="" data-i18n="opt_dn_acq_default">— 请选择收单机构 —</option>
             <option value="629295">AEON Bank (629295)</option><option value="501664">Affin Bank (501664)</option><option value="432134">Al Rajhi Bank (432134)</option><option value="504374">Alliance Bank (504374)</option><option value="564169">AmBank (564169)</option><option value="890293">Ampersand Pay (890293)</option><option value="890061">Axiata Digital / Boost (890061)</option><option value="603346">Bank Islam (603346)</option><option value="589267">Bank Rakyat (589267)</option><option value="564167">Bank Muamalat (564167)</option><option value="629188">Bank of America (629188)</option><option value="629152">Bank of China (629152)</option><option value="589373">Agrobank (589373)</option><option value="420709">BSN (420709)</option><option value="890236">Beez Fintech (890236)</option><option value="890012">BigPay (890012)</option><option value="629204">BNP Paribas (629204)</option><option value="629303">Boost Bank (629303)</option><option value="890244">Boost Connect (890244)</option><option value="629261">China Construction Bank (629261)</option><option value="501854">CIMB Bank (501854)</option><option value="589170">Citibank (589170)</option><option value="890160">Curlec (890160)</option><option value="629246">Deutsche Bank (629246)</option><option value="890145">Fass Payment (890145)</option><option value="890020">Fave (890020)</option><option value="890038">Finexus (890038)</option><option value="890103">GHL (890103)</option><option value="890186">Global Payments (890186)</option><option value="890046">GrabPay (890046)</option><option value="629279">GX Bank (629279)</option><option value="588830">Hong Leong Bank (588830)</option><option value="589836">HSBC (589836)</option><option value="629253">ICBC (629253)</option><option value="890178">Instapay (890178)</option><option value="890079">iPay88 (890079)</option><option value="629212">JP Morgan Chase (629212)</option><option value="629311">KAF Investment Bank (629311)</option><option value="890152">KiplePay (890152)</option><option value="890228">Co-opbank Pertama (890228)</option><option value="639406">Kuwait Finance House (639406)</option><option value="588734">Maybank (588734)</option><option value="890301">ManagePay (890301)</option><option value="432310">MBSB Bank (432310)</option><option value="890111">Merchantrade (890111)</option><option value="629220">Mizuho Bank (629220)</option><option value="890210">MobilityOne (890210)</option><option value="890277">Mobiedge (890277)</option><option value="890327">MRuncit (890327)</option><option value="629196">MUFG Bank (629196)</option><option value="504324">OCBC Bank (504324)</option><option value="890269">Paydibs (890269)</option><option value="890194">Payex (890194)</option><option value="564162">Public Bank (564162)</option><option value="890087">Razer Merchant Services (890087)</option><option value="890095">Revenue Solution (890095)</option><option value="564160">RHB Bank (564160)</option><option value="890129">Setel (890129)</option><option value="890004">ShopeePay (890004)</option><option value="890202">SiliconNet / SPayGlobal (890202)</option><option value="539981">Standard Chartered (539981)</option><option value="890137">Stripe (890137)</option><option value="629238">Sumitomo Mitsui (629238)</option><option value="890053">Touch 'n Go eWallet (890053)</option><option value="890251">UniPin (890251)</option><option value="519469">UOB (519469)</option><option value="890319">Wannapay (890319)</option><option value="629287">YTL Digital Bank (629287)</option><option value="890285">2C2P (890285)</option><option value="898989">JomPAY (898989)</option>
           </select><div class="val-msg" id="v-dn-acquirer"></div>
         </div>
-        <div class="field"><label>Merchant / QR ID <span style="color:#ED2E67">*</span></label><input class="inp" id="dn-gen-qrid" placeholder="e.g. 123456789 (up to 28 chars)" maxlength="28"><div class="val-msg" id="v-dn-qrid"></div></div>
-        <div class="field"><label>Merchant Name <span style="color:#ED2E67">*</span></label><input class="inp" id="dn-gen-name" placeholder="e.g. KEDAI KOPI ALI (up to 25 chars)" maxlength="25"><div class="val-msg" id="v-dn-name"></div></div>
+        <div class="field"><label><span data-i18n="lbl_dn_qrid">商户 / 二维码 ID</span> <span style="color:#ED2E67">*</span></label><input class="inp" id="dn-gen-qrid" data-i18n-ph="ph_dn_qrid" placeholder="例如 123456789（最多 28 个字符）" maxlength="28"><div class="val-msg" id="v-dn-qrid"></div></div>
+        <div class="field"><label><span data-i18n="lbl_dn_name">商户名称</span> <span style="color:#ED2E67">*</span></label><input class="inp" id="dn-gen-name" data-i18n-ph="ph_dn_name" placeholder="例如 KEDAI KOPI ALI（最多 25 个字符）" maxlength="25"><div class="val-msg" id="v-dn-name"></div></div>
         <div class="row r2">
-          <div class="field"><label>City <span style="color:#ED2E67">*</span></label><input class="inp" id="dn-gen-city" placeholder="e.g. KUALA LUMPUR" maxlength="15" value="MY"><div class="val-msg" id="v-dn-city"></div></div>
-          <div class="field"><label>Postal Code</label><input class="inp" id="dn-gen-postal" placeholder="e.g. 59200" maxlength="5"></div>
+          <div class="field"><label><span data-i18n="lbl_dn_city">城市</span> <span style="color:#ED2E67">*</span></label><input class="inp" id="dn-gen-city" data-i18n-ph="ph_dn_city" placeholder="例如 KUALA LUMPUR" maxlength="15" value="MY"><div class="val-msg" id="v-dn-city"></div></div>
+          <div class="field"><label data-i18n="lbl_dn_postal">邮政编码</label><input class="inp" id="dn-gen-postal" data-i18n-ph="ph_dn_postal" placeholder="例如 59200" maxlength="5"></div>
         </div>
         <div class="row r2">
-          <div class="field"><label>Category (MCC)</label>
+          <div class="field"><label data-i18n="lbl_dn_mcc">商户类别 (MCC)</label>
             <select class="inp" id="dn-gen-mcc">
-              <option value="0000">0000 — P2P Transfer</option><option value="4111">4111 — Transport</option><option value="4511">4511 — Airlines</option><option value="4812">4812 — Telecom</option><option value="5311">5311 — Department Store</option><option value="5411" selected>5411 — Grocery</option><option value="5462">5462 — Bakery</option><option value="5499">5499 — Food Store</option><option value="5541">5541 — Fuel/Petrol</option><option value="5812">5812 — Restaurant/Cafe</option><option value="5814">5814 — Fast Food</option><option value="5912">5912 — Pharmacy</option><option value="5999">5999 — Retail (General)</option><option value="6010">6010 — POS Cash Out</option><option value="6012">6012 — Banking</option><option value="7011">7011 — Hotel</option><option value="7230">7230 — Beauty/Barber</option><option value="7299">7299 — Services</option><option value="7832">7832 — Cinema</option><option value="8011">8011 — Medical</option><option value="8021">8021 — Dental</option><option value="8099">8099 — Health Services</option><option value="8211">8211 — School</option><option value="8220">8220 — University</option><option value="9999">9999 — Government</option><option value="1111">1111 — Bill Payment</option>
+              <option value="0000" data-i18n="mcc_0000">0000 — 个人转账 (P2P)</option><option value="4111" data-i18n="mcc_4111">4111 — 交通出行</option><option value="4511" data-i18n="mcc_4511">4511 — 航空公司</option><option value="4812" data-i18n="mcc_4812">4812 — 电信服务</option><option value="5311" data-i18n="mcc_5311">5311 — 百货商场</option><option value="5411" selected data-i18n="mcc_5411">5411 — 超市/杂货</option><option value="5462" data-i18n="mcc_5462">5462 — 烘焙/面包店</option><option value="5499" data-i18n="mcc_5499">5499 — 食品店</option><option value="5541" data-i18n="mcc_5541">5541 — 加油站</option><option value="5812" data-i18n="mcc_5812">5812 — 餐厅/咖啡馆</option><option value="5814" data-i18n="mcc_5814">5814 — 快餐店</option><option value="5912" data-i18n="mcc_5912">5912 — 药店</option><option value="5999" data-i18n="mcc_5999">5999 — 综合零售</option><option value="6010" data-i18n="mcc_6010">6010 — POS 取现</option><option value="6012" data-i18n="mcc_6012">6012 — 银行金融</option><option value="7011" data-i18n="mcc_7011">7011 — 酒店住宿</option><option value="7230" data-i18n="mcc_7230">7230 — 美容/美发</option><option value="7299" data-i18n="mcc_7299">7299 — 综合服务</option><option value="7832" data-i18n="mcc_7832">7832 — 电影院</option><option value="8011" data-i18n="mcc_8011">8011 — 医疗诊所</option><option value="8021" data-i18n="mcc_8021">8021 — 牙科诊所</option><option value="8099" data-i18n="mcc_8099">8099 — 健康服务</option><option value="8211" data-i18n="mcc_8211">8211 — 中小学校</option><option value="8220" data-i18n="mcc_8220">8220 — 高等院校</option><option value="9999" data-i18n="mcc_9999">9999 — 政府机构</option><option value="1111" data-i18n="mcc_1111">1111 — 账单缴费</option>
             </select>
           </div>
-          <div class="field"><label>Amount (optional)</label><input class="inp" id="dn-gen-amount" placeholder="e.g. 10.00" type="number" step="0.01" min="0"><div class="val-msg" id="v-dn-amount"></div></div>
+          <div class="field"><label data-i18n="lbl_dn_amount">金额（可选）</label><input class="inp" id="dn-gen-amount" data-i18n-ph="ph_dn_amount" placeholder="例如 10.00" type="number" step="0.01" min="0"><div class="val-msg" id="v-dn-amount"></div></div>
         </div>
         <hr class="sep">
-        <div style="margin-bottom:10px"><button class="pill" style="font-size:.7rem" onclick="document.getElementById('dn-gen-addl').style.display=document.getElementById('dn-gen-addl').style.display==='none'?'block':'none'">⚙ Additional Data (optional)</button></div>
+        <div style="margin-bottom:10px"><button class="pill" style="font-size:.7rem" onclick="document.getElementById('dn-gen-addl').style.display=document.getElementById('dn-gen-addl').style.display==='none'?'block':'none'" data-i18n="btn_dn_addl">⚙ 附加数据（可选）</button></div>
         <div id="dn-gen-addl" style="display:none">
           <div class="row r2">
-            <div class="field"><label>Reference Label</label><input class="inp" id="dn-gen-ref" placeholder="Reference" maxlength="25"></div>
-            <div class="field"><label>Terminal Label</label><input class="inp" id="dn-gen-terminal" placeholder="Terminal ID" maxlength="25"></div>
+            <div class="field"><label data-i18n="lbl_dn_ref">参考标签</label><input class="inp" id="dn-gen-ref" data-i18n-ph="ph_dn_ref" placeholder="参考编号" maxlength="25"></div>
+            <div class="field"><label data-i18n="lbl_dn_terminal">终端标签</label><input class="inp" id="dn-gen-terminal" data-i18n-ph="ph_dn_terminal" placeholder="终端 ID" maxlength="25"></div>
           </div>
           <div class="row r2">
-            <div class="field"><label>Bill Number</label><input class="inp" id="dn-gen-bill" placeholder="Invoice #" maxlength="25"></div>
-            <div class="field"><label>Store Label</label><input class="inp" id="dn-gen-store" placeholder="Store #" maxlength="25"></div>
+            <div class="field"><label data-i18n="lbl_dn_bill">账单编号</label><input class="inp" id="dn-gen-bill" data-i18n-ph="ph_dn_bill" placeholder="发票/账单号" maxlength="25"></div>
+            <div class="field"><label data-i18n="lbl_dn_store">门店标签</label><input class="inp" id="dn-gen-store" data-i18n-ph="ph_dn_store" placeholder="门店编号" maxlength="25"></div>
           </div>
         </div>
       </div>
     </div>
-    <div class="link-box" id="std-link-box"><div class="link-label">Encoded data</div><div class="link-val" id="std-link-val"></div><button class="copy-btn" onclick="copyLink()">Copy</button></div>
+    <div class="link-box" id="std-link-box"><div class="link-label" data-i18n="lbl_encoded_data">编码数据</div><div class="link-val" id="std-link-val"></div><button class="copy-btn" onclick="copyLink()" data-i18n="btn_copy">复制</button></div>
     <div class="card">
-      <div class="card-title">Style & Colors</div>
+      <div class="card-title" data-i18n="title_style_colors">样式与颜色</div>
       <div class="row r3">
-        <div class="field"><label>QR color</label><input type="color" class="inp" id="std-fg" value="#000000"></div>
-        <div class="field"><label>Background</label><input type="color" class="inp" id="std-bg" value="#ffffff"></div>
-        <div class="field"><label><span class="tip">Error correction <span class="tip-icon">?</span><span class="tip-text"><strong>Higher = more reliable.</strong> Your QR stores backup data so it scans even if damaged.<br><br><strong>L (7%)</strong> — Smallest QR, least protection.<br><strong>M (15%)</strong> — Good default.<br><strong>Q (25%)</strong> — Recommended with logos.<br><strong>H (30%)</strong> — Maximum recovery, densest code.</span></span></label><select class="inp" id="std-ecc"><option value="L">Low (7%)</option><option value="M" selected>Medium (15%)</option><option value="Q">Quartile (25%)</option><option value="H">High (30%)</option></select></div>
+        <div class="field"><label data-i18n="lbl_qr_color">二维码颜色</label><input type="color" class="inp" id="std-fg" value="#000000"></div>
+        <div class="field"><label data-i18n="lbl_bg_color">背景颜色</label><input type="color" class="inp" id="std-bg" value="#ffffff"></div>
+        <div class="field"><label><span class="tip"><span data-i18n="lbl_ecc">容错率</span> <span class="tip-icon">?</span><span class="tip-text" id="i18n-std-ecc-tip"><strong>越高越可靠。</strong>二维码会存储备份数据，即使部分受损也能正常识别。<br><br><strong>L (7%)</strong> — 二维码最简洁，保护最低。<br><strong>M (15%)</strong> — 推荐默认选项。<br><strong>Q (25%)</strong> — 添加 Logo 时推荐使用。<br><strong>H (30%)</strong> — 最高恢复能力，码点最密。</span></span></label><select class="inp" id="std-ecc"><option value="L" data-i18n="opt_ecc_l">低 (7%)</option><option value="M" selected data-i18n="opt_ecc_m">中 (15%)</option><option value="Q" data-i18n="opt_ecc_q">较高 (25%)</option><option value="H" data-i18n="opt_ecc_h">高 (30%)</option></select></div>
       </div>
       <div class="presets" id="color-presets"><div class="preset" data-fg="#000000" data-bg="#ffffff" style="background:#fff"><div class="fg" style="background:#000"></div></div><div class="preset" data-fg="#ffffff" data-bg="#000000" style="background:#000"><div class="fg" style="background:#fff"></div></div><div class="preset" data-fg="#1a365d" data-bg="#e2e8f0" style="background:#e2e8f0"><div class="fg" style="background:#1a365d"></div></div><div class="preset" data-fg="#7c2d12" data-bg="#fef3c7" style="background:#fef3c7"><div class="fg" style="background:#7c2d12"></div></div><div class="preset" data-fg="#166534" data-bg="#dcfce7" style="background:#dcfce7"><div class="fg" style="background:#166534"></div></div><div class="preset" data-fg="#7e22ce" data-bg="#f3e8ff" style="background:#f3e8ff"><div class="fg" style="background:#7e22ce"></div></div><div class="preset" data-fg="#0369a1" data-bg="#e0f2fe" style="background:#e0f2fe"><div class="fg" style="background:#0369a1"></div></div></div>
-      <div class="contrast-warn" id="contrast-warn">⚠ Low contrast — may affect scanning</div>
+      <div class="contrast-warn" id="contrast-warn" data-i18n="msg_contrast_warn">⚠ 对比度过低 — 可能会影响扫码识别</div>
       <hr class="sep">
-      <div class="row r3"><div class="field"><label>Resolution</label><select class="inp" id="std-res"><option value="256">256px</option><option value="512" selected>512px</option><option value="1024">1024px</option><option value="2048">2048px</option></select></div><div class="field"><label>Template</label><select class="inp" id="std-tmpl"><option value="classic">Classic</option><option value="christmas">🎄 Christmas</option><option value="halloween">🎃 Halloween</option><option value="newyear">🎆 New Year</option><option value="easter">🥚 Easter</option><option value="valentine">💝 Valentine</option><option value="stpatricks">☘️ St. Patrick's</option><option value="birthday">🎂 Birthday</option></select></div><div class="field"><label>Center logo</label><div class="dz" id="std-logo-dz" style="padding:8px;font-size:.74rem"><span id="std-logo-prompt">Tap to upload</span><input type="file" id="std-logo-fi" accept="image/*"></div></div></div>
-      <div id="std-logo-strip" class="logo-strip" style="display:none"><img id="std-logo-preview"><span class="remove" onclick="clearStdLogo()">✕ Remove</span></div>
+      <div class="row r3"><div class="field"><label data-i18n="lbl_res">分辨率</label><select class="inp" id="std-res"><option value="256">256px</option><option value="512" selected>512px</option><option value="1024">1024px</option><option value="2048">2048px</option></select></div><div class="field"><label data-i18n="lbl_tmpl">主题模板</label><select class="inp" id="std-tmpl"><option value="classic" data-i18n="tmpl_classic">经典</option><option value="christmas" data-i18n="tmpl_christmas">🎄 圣诞节</option><option value="halloween" data-i18n="tmpl_halloween">🎃 万圣节</option><option value="newyear" data-i18n="tmpl_newyear">🎆 新年</option><option value="easter" data-i18n="tmpl_easter">🥚 复活节</option><option value="valentine" data-i18n="tmpl_valentine">💝 情人节</option><option value="stpatricks" data-i18n="tmpl_stpatricks">☘️ 圣帕特里克节</option><option value="birthday" data-i18n="tmpl_birthday">🎂 生日</option></select></div><div class="field"><label data-i18n="lbl_center_logo">中心 Logo</label><div class="dz" id="std-logo-dz" style="padding:8px;font-size:.74rem"><span id="std-logo-prompt" data-i18n="lbl_tap_upload">点击上传</span><input type="file" id="std-logo-fi" accept="image/*"></div></div></div>
+      <div id="std-logo-strip" class="logo-strip" style="display:none"><img id="std-logo-preview"><span class="remove" onclick="clearStdLogo()" data-i18n="btn_remove_logo">✕ 移除</span></div>
       <hr class="sep">
-      <div class="field"><label>Stroke width — <span class="rv" id="stroke-val">0%</span></label><input type="range" id="std-stroke" min="0" max="13" value="0"></div>
-      <div class="row r2" style="margin-top:8px"><div class="field"><label class="chk"><input type="checkbox" id="std-outline"> Add outline</label></div><div class="field"><label class="chk"><input type="checkbox" id="std-invert"> Invert colors</label></div></div>
+      <div class="field"><label><span data-i18n="lbl_stroke_width">边框留白宽度 — </span><span class="rv" id="stroke-val">0%</span></label><input type="range" id="std-stroke" min="0" max="13" value="0"></div>
+      <div class="row r2" style="margin-top:8px"><div class="field"><label class="chk"><input type="checkbox" id="std-outline"> <span data-i18n="chk_add_outline">添加外框线</span></label></div><div class="field"><label class="chk"><input type="checkbox" id="std-invert"> <span data-i18n="chk_invert_colors">反转颜色</span></label></div></div>
     </div>
     <div class="preview-area" id="std-preview-area">
       <div class="qr-tmpl-frame" id="std-frame"><canvas id="std-canvas"></canvas></div>
@@ -243,33 +255,33 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div class="dl-row">
         <button class="dl-btn" onclick="dlStdPNG()"><svg class="dl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PNG</button>
         <button class="dl-btn" onclick="dlStdSVG()"><svg class="dl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>SVG</button>
-        <button class="dl-btn" onclick="shareStd()"><svg class="dl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>
+        <button class="dl-btn" onclick="shareStd()"><svg class="dl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span data-i18n="btn_share">分享</span></button>
       </div>
     </div>
   </div>
 
   <!-- ══════ CHROMACODE ══════ -->
   <div class="sec" id="sec-chroma">
-    <div class="card"><div class="field"><label>URL to encode</label><input class="inp" id="cc-url" placeholder="https://example.com" spellcheck="false"><div class="val-msg" id="v-cc-url"></div></div></div>
+    <div class="card"><div class="field"><label data-i18n="lbl_cc_url">要编码的网址 (URL)</label><input class="inp" id="cc-url" placeholder="https://example.com" spellcheck="false"><div class="val-msg" id="v-cc-url"></div></div></div>
     <div class="card">
-      <div class="card-title">Brand Image</div>
-      <div class="src-tabs" id="cc-tabs"><div class="src-tab on" data-t="fav">Favicon</div><div class="src-tab" data-t="upl">Upload</div><div class="src-tab" data-t="iu">Image URL</div></div>
-      <div id="cc-t-fav" class="src-tb on"><p style="font-size:.78rem;color:var(--text3)">Auto-fetches the site's favicon from the URL above.</p></div>
-      <div id="cc-t-upl" class="src-tb"><div class="dz" id="cc-dz"><span id="cc-dp">Drop image or tap to browse</span><input type="file" id="cc-fi" accept="image/*"></div></div>
+      <div class="card-title" data-i18n="title_brand_img">品牌图像</div>
+      <div class="src-tabs" id="cc-tabs"><div class="src-tab on" data-t="fav" data-i18n="tab_cc_fav">网站图标</div><div class="src-tab" data-t="upl" data-i18n="tab_cc_upl">上传图片</div><div class="src-tab" data-t="iu" data-i18n="tab_cc_iu">图片链接</div></div>
+      <div id="cc-t-fav" class="src-tb on"><p style="font-size:.78rem;color:var(--text3)" data-i18n="desc_cc_fav">自动从上方输入的网址获取网站图标 (Favicon)。</p></div>
+      <div id="cc-t-upl" class="src-tb"><div class="dz" id="cc-dz"><span id="cc-dp" data-i18n="lbl_cc_drop">拖入图片或点击浏览上传</span><input type="file" id="cc-fi" accept="image/*"></div></div>
       <div id="cc-t-iu" class="src-tb"><input class="inp" id="cc-iu" placeholder="https://example.com/logo.png" spellcheck="false"></div>
     </div>
-    <div class="adv-toggle"><button onclick="document.getElementById('cc-adv').classList.toggle('open')">⚙ Advanced Settings</button></div>
+    <div class="adv-toggle"><button onclick="document.getElementById('cc-adv').classList.toggle('open')" data-i18n="btn_cc_adv">⚙ 高级设置</button></div>
     <div id="cc-adv" class="adv-panel"><div class="card">
-      <div class="row r3"><div class="field"><label>Dot shape</label><select class="inp" id="cc-shp"><option value="circle">Circle</option><option value="rrect">Rounded</option><option value="sq">Square</option></select></div><div class="field"><label><span class="tip">Error correction <span class="tip-icon">?</span><span class="tip-text"><strong>Higher = more reliable.</strong> ChromaCode modifies dots heavily, so <strong>High</strong> is recommended.<br><br><strong>H (30%)</strong> — Best for ChromaCode.<br><strong>Q (25%)</strong> — OK for simple logos.<br><strong>M (15%)</strong> — Risky with blending.</span></span></label><select class="inp" id="cc-ecc"><option value="H" selected>High</option><option value="Q">Quartile</option><option value="M">Medium</option></select></div><div class="field"><label>Output size</label><select class="inp" id="cc-osz"><option value="800">800px</option><option value="1024" selected>1024px</option><option value="1600">1600px</option><option value="2048">2048px</option></select></div></div>
+      <div class="row r3"><div class="field"><label data-i18n="lbl_cc_shape">码点形状</label><select class="inp" id="cc-shp"><option value="circle" data-i18n="opt_shp_circle">圆形</option><option value="rrect" data-i18n="opt_shp_rrect">圆角矩形</option><option value="sq" data-i18n="opt_shp_sq">方形</option></select></div><div class="field"><label><span class="tip"><span data-i18n="lbl_ecc">容错率</span> <span class="tip-icon">?</span><span class="tip-text" id="i18n-cc-ecc-tip"><strong>越高越可靠。</strong>炫彩码会对码点进行大幅调整，建议选择<strong>高</strong>。<br><br><strong>H (30%)</strong> — 最适合炫彩码。<br><strong>Q (25%)</strong> — 适合简单 Logo。<br><strong>M (15%)</strong> — 图像融合时存在识别风险。</span></span></label><select class="inp" id="cc-ecc"><option value="H" selected data-i18n="opt_cc_ecc_h">高</option><option value="Q" data-i18n="opt_cc_ecc_q">较高</option><option value="M" data-i18n="opt_cc_ecc_m">中</option></select></div><div class="field"><label data-i18n="lbl_cc_osz">输出尺寸</label><select class="inp" id="cc-osz"><option value="800">800px</option><option value="1024" selected>1024px</option><option value="1600">1600px</option><option value="2048">2048px</option></select></div></div>
       <hr class="sep">
-      <div class="field"><label>Dark dot range</label><div class="row r2"><div class="range-row"><input type="range" id="cc-dmn" min="15" max="60" value="30"><span class="rv" id="cc-vdmn">30%</span></div><div class="range-row"><input type="range" id="cc-dmx" min="70" max="110" value="105"><span class="rv" id="cc-vdmx">105%</span></div></div></div>
-      <div class="field"><label>Ghost strength</label><div class="range-row"><input type="range" id="cc-gs" min="0" max="80" value="80"><span class="rv" id="cc-vgs">80%</span></div></div>
-      <div class="field"><label>Ghost threshold</label><div class="range-row"><input type="range" id="cc-gt" min="0" max="60" value="8"><span class="rv" id="cc-vgt">8%</span></div></div>
+      <div class="field"><label data-i18n="lbl_cc_dark_range">深色码点大小范围</label><div class="row r2"><div class="range-row"><input type="range" id="cc-dmn" min="15" max="60" value="30"><span class="rv" id="cc-vdmn">30%</span></div><div class="range-row"><input type="range" id="cc-dmx" min="70" max="110" value="105"><span class="rv" id="cc-vdmx">105%</span></div></div></div>
+      <div class="field"><label data-i18n="lbl_cc_gs">虚影点强度</label><div class="range-row"><input type="range" id="cc-gs" min="0" max="80" value="80"><span class="rv" id="cc-vgs">80%</span></div></div>
+      <div class="field"><label data-i18n="lbl_cc_gt">虚影点阈值</label><div class="range-row"><input type="range" id="cc-gt" min="0" max="60" value="8"><span class="rv" id="cc-vgt">8%</span></div></div>
       <hr class="sep">
-      <div class="row r2"><div class="field"><label>Background</label><input type="color" class="inp" id="cc-bgc" value="#ffffff"></div><div class="field"><label>Fallback dark</label><input type="color" class="inp" id="cc-fdc" value="#000000"></div></div>
-      <div class="field" style="margin-top:10px"><label class="chk"><input type="checkbox" id="cc-col" checked> Use image colors</label></div>
+      <div class="row r2"><div class="field"><label data-i18n="lbl_bg_color">背景颜色</label><input type="color" class="inp" id="cc-bgc" value="#ffffff"></div><div class="field"><label data-i18n="lbl_cc_fdc">默认深色</label><input type="color" class="inp" id="cc-fdc" value="#000000"></div></div>
+      <div class="field" style="margin-top:10px"><label class="chk"><input type="checkbox" id="cc-col" checked> <span data-i18n="chk_cc_col">使用图片自身颜色</span></label></div>
     </div></div>
-    <button class="gen-btn" id="cc-gen-btn" onclick="generateChroma()">Generate ChromaCode</button>
+    <button class="gen-btn" id="cc-gen-btn" onclick="generateChroma()" data-i18n="btn_cc_gen">生成炫彩码 (ChromaCode)</button>
     <div id="cc-status" class="status"></div>
     <div class="preview-area" id="cc-preview-area">
       <div id="cc-srcinfo" class="src-info" style="display:none"><img id="cc-sth"><span id="cc-sn">—</span><div class="pal" id="cc-pal"></div></div>
@@ -285,77 +297,617 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <!-- ══════ SCANNER ══════ -->
   <div class="sec" id="sec-scanner">
     <div class="card">
-      <div class="card-title">Scan QR Code</div>
-      <p style="font-size:.82rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Decode any QR code from your <strong>camera</strong>, an <strong>image file</strong>, or <strong>paste</strong> from clipboard. Everything is processed locally — nothing leaves your browser.<br><span style="color:var(--accent);font-weight:500">🇲🇾 Full DuitNow QR breakdown</span> — 70 acquirers/banks from PayNet's official registry, CRC verification, tip/fee parsing & clean QR regeneration.</p>
+      <div class="card-title" data-i18n="title_scan_qr">扫描二维码</div>
+      <p id="i18n-scan-desc" style="font-size:.82rem;color:var(--text2);margin-bottom:14px;line-height:1.6">通过<strong>摄像头</strong>、<strong>图片文件</strong>或<strong>剪贴板粘贴</strong>解码任意二维码。所有处理均在本地完成 — 数据绝不会离开您的浏览器。<br><span style="color:var(--accent);font-weight:500">🇲🇾 完整 DuitNow 二维码解析</span> — 支持 PayNet 官方名录中的 70 家收单机构/银行、CRC 校验、小费/手续费解析及高清二维码重新生成。</p>
       <div style="margin-bottom:14px">
-        <button class="gen-btn" id="cam-btn" onclick="toggleCamera()" style="margin-bottom:8px">📷 Open Camera</button>
+        <button class="gen-btn" id="cam-btn" onclick="toggleCamera()" style="margin-bottom:8px" data-i18n="btn_cam_open">📷 打开摄像头</button>
+        <div class="val-msg err" id="cam-err-msg" style="text-align:center;display:none;margin-bottom:8px"></div>
         <div id="cam-wrap" style="display:none;position:relative;max-width:440px;margin:0 auto;border-radius:var(--radius-lg);overflow:hidden;background:#000">
           <video id="cam-video" autoplay playsinline muted style="display:block;width:100%;border-radius:var(--radius-lg)"></video>
           <canvas id="cam-canvas" style="display:none"></canvas>
           <div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:65%;height:65%;border:2px solid var(--accent);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.4)"></div></div>
-          <div id="cam-status" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:6px 14px;border-radius:20px;font-size:.75rem;font-family:'JetBrains Mono',monospace">Scanning…</div>
+          <div id="cam-status" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:6px 14px;border-radius:20px;font-size:.75rem;font-family:'JetBrains Mono',monospace" data-i18n="msg_cam_scanning">正在扫描…</div>
         </div>
-        <div style="font-size:.72rem;color:var(--text3);margin-top:6px;text-align:center">🔒 Camera access stays in your browser. We never record, store, or transmit video.</div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:6px;text-align:center" data-i18n="msg_cam_privacy">🔒 摄像头权限仅在浏览器本地使用，我们绝不录制、存储或传输任何视频。</div>
       </div>
       <hr class="sep">
-      <div class="dz" id="scan-dz" style="padding:28px 16px"><div style="font-size:1.4rem;margin-bottom:6px">📁</div><span id="scan-dp">Drop image, tap to browse, or paste (Ctrl+V)</span><input type="file" id="scan-fi" accept="image/*"></div>
+      <div class="dz" id="scan-dz" style="padding:28px 16px"><div style="font-size:1.4rem;margin-bottom:6px">📁</div><span id="scan-dp" data-i18n="lbl_scan_drop">拖入图片、点击浏览，或直接粘贴 (Ctrl+V)</span><input type="file" id="scan-fi" accept="image/*"></div>
       <canvas id="scan-canvas" style="display:none"></canvas>
     </div>
     <div id="scan-result" style="display:none">
       <div class="card" id="scan-safety-card"><div id="scan-safety"></div></div>
       <div class="card" id="duitnow-card" style="display:none">
-        <div class="card-title" style="color:var(--accent)">🇲🇾 DuitNow QR Breakdown</div>
+        <div class="card-title" style="color:var(--accent)" data-i18n="title_dn_breakdown">🇲🇾 DuitNow 二维码详细解析</div>
         <div id="duitnow-breakdown" style="font-size:.84rem;line-height:1.8"></div>
         <div id="duitnow-regen" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-          <div class="card-title" style="color:var(--accent)">🔄 Regenerated QR</div>
-          <div class="field"><label>Merchant Name</label><input class="inp" id="dn-edit-name" oninput="regenDuitNow()" placeholder="Merchant name"></div>
-          <div class="field"><label>Bank / Wallet</label><input class="inp" id="dn-edit-bank" list="dn-bank-list" oninput="regenDuitNow()" placeholder="e.g. Maybank, CIMB, GrabPay">
+          <div class="card-title" style="color:var(--accent)" data-i18n="title_dn_regen">🔄 重新生成的二维码</div>
+          <div class="field"><label data-i18n="lbl_dn_name">商户名称</label><input class="inp" id="dn-edit-name" oninput="regenDuitNow()" data-i18n-ph="ph_dn_edit_name" placeholder="请输入商户名称"></div>
+          <div class="field"><label data-i18n="lbl_dn_edit_bank">银行 / 电子钱包</label><input class="inp" id="dn-edit-bank" list="dn-bank-list" oninput="regenDuitNow()" data-i18n-ph="ph_dn_edit_bank" placeholder="例如 Maybank, CIMB, GrabPay">
           <datalist id="dn-bank-list"><option value="AEON Bank"><option value="Affin Bank"><option value="Agrobank"><option value="Al Rajhi Bank"><option value="Alliance Bank"><option value="AmBank"><option value="Ampersand Pay"><option value="Bank Islam"><option value="Bank Muamalat"><option value="Bank Rakyat"><option value="BigPay"><option value="Boost Bank"><option value="Boost Connect"><option value="BSN"><option value="China Construction Bank"><option value="CIMB Bank"><option value="Citibank"><option value="Co-opbank Pertama"><option value="Curlec"><option value="Fave"><option value="Finexus"><option value="GHL"><option value="GrabPay"><option value="GX Bank"><option value="Hong Leong Bank"><option value="HSBC"><option value="ICBC"><option value="iPay88"><option value="KiplePay"><option value="Kuwait Finance House"><option value="Maybank"><option value="Maybank MAE"><option value="MBSB Bank"><option value="Merchantrade"><option value="OCBC Bank"><option value="Public Bank"><option value="Razer Merchant Services"><option value="RHB Bank"><option value="Setel"><option value="ShopeePay"><option value="Standard Chartered"><option value="Touch 'n Go eWallet"><option value="UOB"><option value="YTL Digital Bank"><option value="2C2P"><option value="JomPAY"></datalist></div>
           <div class="row r2" style="margin-bottom:14px">
-            <div class="field"><label>Name font size — <span class="rv" id="dn-name-fz-val">100%</span></label><input type="range" id="dn-name-fz" min="50" max="200" value="100" oninput="document.getElementById('dn-name-fz-val').textContent=this.value+'%';regenDuitNow()"></div>
-            <div class="field"><label>Bank font size — <span class="rv" id="dn-bank-fz-val">100%</span></label><input type="range" id="dn-bank-fz" min="50" max="200" value="100" oninput="document.getElementById('dn-bank-fz-val').textContent=this.value+'%';regenDuitNow()"></div>
+            <div class="field"><label><span data-i18n="lbl_dn_name_fz">商户名文字大小 — </span><span class="rv" id="dn-name-fz-val">100%</span></label><input type="range" id="dn-name-fz" min="50" max="200" value="100" oninput="document.getElementById('dn-name-fz-val').textContent=this.value+'%';regenDuitNow()"></div>
+            <div class="field"><label><span data-i18n="lbl_dn_bank_fz">银行名文字大小 — </span><span class="rv" id="dn-bank-fz-val">100%</span></label><input type="range" id="dn-bank-fz" min="50" max="200" value="100" oninput="document.getElementById('dn-bank-fz-val').textContent=this.value+'%';regenDuitNow()"></div>
           </div>
-          <div class="field"><label>Print Size</label>
+          <div class="field"><label data-i18n="lbl_dn_print_size">打印尺寸</label>
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
-              <button class="pill dn-size" data-w="400" onclick="setDnSize(400)">Small</button>
-              <button class="pill dn-size on" data-w="600" onclick="setDnSize(600)">Medium</button>
-              <button class="pill dn-size" data-w="900" onclick="setDnSize(900)">Large</button>
-              <button class="pill dn-size" data-w="1200" onclick="setDnSize(1200)">Counter</button>
-              <button class="pill dn-size" data-w="1800" onclick="setDnSize(1800)">Poster</button>
-              <button class="pill dn-size" data-w="2400" onclick="setDnSize(2400)">A4 Print</button>
+              <button class="pill dn-size" data-w="400" onclick="setDnSize(400)" data-i18n="sz_small">小号</button>
+              <button class="pill dn-size on" data-w="600" onclick="setDnSize(600)" data-i18n="sz_medium">中号</button>
+              <button class="pill dn-size" data-w="900" onclick="setDnSize(900)" data-i18n="sz_large">大号</button>
+              <button class="pill dn-size" data-w="1200" onclick="setDnSize(1200)" data-i18n="sz_counter">收银台立牌</button>
+              <button class="pill dn-size" data-w="1800" onclick="setDnSize(1800)" data-i18n="sz_poster">海报</button>
+              <button class="pill dn-size" data-w="2400" onclick="setDnSize(2400)" data-i18n="sz_a4">A4 打印</button>
             </div>
-            <div style="display:flex;gap:8px;align-items:center"><span style="font-size:.72rem;color:var(--text3)">Custom:</span><input type="range" id="dn-size-slider" min="300" max="3000" value="600" oninput="setDnSizeSlider(this.value)" style="flex:1"><span class="rv" id="dn-size-val">600px</span></div>
-            <div style="font-size:.68rem;color:var(--text3);margin-top:6px">Small = sticker · Medium = table card · Counter = 10cm display · Poster = A5 · A4 Print = 300dpi full page</div>
+            <div style="display:flex;gap:8px;align-items:center"><span style="font-size:.72rem;color:var(--text3)" data-i18n="lbl_custom_size">自定义：</span><input type="range" id="dn-size-slider" min="300" max="3000" value="600" oninput="setDnSizeSlider(this.value)" style="flex:1"><span class="rv" id="dn-size-val">600px</span></div>
+            <div style="font-size:.68rem;color:var(--text3);margin-top:6px" data-i18n="msg_dn_size_hint">小号 = 贴纸 · 中号 = 桌卡 · 收银台立牌 = 10cm 展示牌 · 海报 = A5 · A4 打印 = 300dpi 全页</div>
           </div>
           <div style="background:#fff;border-radius:var(--radius-lg);padding:16px;max-width:400px;margin:0 auto 12px;text-align:center">
             <canvas id="duitnow-canvas" style="display:block;width:100%;height:auto;border-radius:8px"></canvas>
             <div id="duitnow-regen-name" style="display:none"></div>
             <div id="duitnow-regen-bank" style="display:none"></div>
           </div>
-          <div class="dl-row"><button class="dl-btn" onclick="dlDuitNowPNG()">📥 Download PNG</button><button class="dl-btn" onclick="shareDuitNow()">📤 Share</button></div>
+          <div class="dl-row"><button class="dl-btn" onclick="dlDuitNowPNG()" data-i18n="btn_dn_dl_png">📥 下载 PNG</button><button class="dl-btn" onclick="shareDuitNow()" data-i18n="btn_dn_share">📤 分享</button></div>
           <div style="font-size:.68rem;color:var(--text3);text-align:center;margin-top:4px" id="dn-dimensions"></div>
         </div>
-        <div style="font-size:.68rem;color:var(--text3);margin-top:12px;padding-top:8px;border-top:1px solid var(--border)">EMV QR research by <a href="https://github.com/natsu90/duitnowqr-test" target="_blank" style="color:var(--accent);text-decoration:none">natsu90</a> · Acquirer list from <a href="https://docs.developer.paynet.my/docs/duitNow-QR/integration/QR-generation-specification/merchant-presented-mode/qr-data-object" target="_blank" style="color:var(--accent);text-decoration:none">PayNet QR Spec v1.5</a> · <a href="https://docs.developer.paynet.my/docs" target="_blank" style="color:var(--accent);text-decoration:none">PayNet Developer Docs</a> · DuitNow is a product of <a href="https://www.paynet.my" target="_blank" style="color:var(--accent);text-decoration:none">PayNet Malaysia</a></div>
+        <div id="i18n-dn-credits" style="font-size:.68rem;color:var(--text3);margin-top:12px;padding-top:8px;border-top:1px solid var(--border)">EMV 二维码研究：<a href="https://github.com/natsu90/duitnowqr-test" target="_blank" style="color:var(--accent);text-decoration:none">natsu90</a> · 收单机构列表源自 <a href="https://docs.developer.paynet.my/docs/duitNow-QR/integration/QR-generation-specification/merchant-presented-mode/qr-data-object" target="_blank" style="color:var(--accent);text-decoration:none">PayNet QR 规范 v1.5</a> · <a href="https://docs.developer.paynet.my/docs" target="_blank" style="color:var(--accent);text-decoration:none">PayNet 开发者文档</a> · DuitNow 是 <a href="https://www.paynet.my" target="_blank" style="color:var(--accent);text-decoration:none">PayNet Malaysia</a> 旗下产品</div>
       </div>
       <div class="card">
-        <div class="card-title">Decoded Content</div>
+        <div class="card-title" data-i18n="title_decoded_content">解码内容</div>
         <div id="scan-type-badge" style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;background:var(--accent);color:#fff;margin-bottom:10px"></div>
         <div id="scan-content" style="font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);word-break:break-all;line-height:1.6;background:var(--bg);padding:14px;border-radius:var(--radius);border:1px solid var(--border);user-select:all"></div>
         <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-          <button class="dl-btn" onclick="copyScanResult()">📋 Copy</button>
-          <button class="dl-btn" id="scan-open-btn" style="display:none">🔗 Open Link</button>
-          <button class="dl-btn" onclick="clearScan()">✕ Clear</button>
+          <button class="dl-btn" onclick="copyScanResult()" data-i18n="btn_scan_copy">📋 复制</button>
+          <button class="dl-btn" id="scan-open-btn" style="display:none">🔗 打开链接</button>
+          <button class="dl-btn" onclick="clearScan()" data-i18n="btn_scan_clear">✕ 清除</button>
         </div>
       </div>
     </div>
   </div>
 
 </div>
-<div class="footer">
-  QR Studio by <a href="https://github.com/deadboy18" target="_blank">deadboy18</a> · ChromaCode by <a href="https://github.com/TomsNimanis/chromacode" target="_blank">Toms Nimanis / IT Linden</a> · DuitNow research by <a href="https://github.com/natsu90/duitnowqr-test" target="_blank">natsu90</a> · <a href="https://docs.developer.paynet.my/docs" target="_blank">PayNet Developer Docs</a><br>
-  Special thanks to <a href="https://github.com/VenimK" target="_blank">VenimK</a> ❤️
+<div class="footer" id="i18n-footer">
+  QR Studio 作者 <a href="https://github.com/deadboy18" target="_blank">deadboy18</a> · ChromaCode 作者 <a href="https://github.com/TomsNimanis/chromacode" target="_blank">Toms Nimanis / IT Linden</a> · DuitNow 研究 <a href="https://github.com/natsu90/duitnowqr-test" target="_blank">natsu90</a> · <a href="https://docs.developer.paynet.my/docs" target="_blank">PayNet 开发者文档</a><br>
+  特别鸣谢 <a href="https://github.com/VenimK" target="_blank">VenimK</a> ❤️
 </div>
 <script>
+// ═══════ LANGUAGE / I18N ═══════
+let curLang='zh';
+const I18N={
+  zh:{
+    doc_title:'QR Studio — 二维码生成与品牌定制工具',
+    theme_light_tip:'浅色模式',
+    theme_dark_tip:'深色模式',
+    hdr_sub:'标准与品牌定制二维码，纯净无冗余',
+    mode_std:'标准模式',
+    mode_std_sub:'经典二维码生成',
+    mode_cc:'炫彩码',
+    mode_cc_sub:'图像融合马赛克艺术码',
+    mode_scan:'扫码识别',
+    mode_scan_sub:'读取与解析二维码',
+    pill_url:'网址',
+    pill_text:'文本',
+    pill_wifi:'WiFi',
+    pill_email:'邮箱',
+    pill_phone:'电话',
+    pill_sms:'短信',
+    pill_whatsapp:'WhatsApp',
+    pill_location:'位置',
+    pill_calendar:'日程',
+    pill_vcard:'名片 (vCard)',
+    ph_in_text:'请输入任意文本或消息内容…',
+    lbl_wifi_ssid:'网络名称 (SSID)',
+    lbl_wifi_pass:'密码',
+    ph_wifi_pass:'至少 8 个字符',
+    lbl_wifi_enc:'加密方式',
+    opt_wifi_none:'无密码',
+    chk_wifi_hidden:'隐藏网络',
+    title_wifi_below:'在二维码下方显示信息',
+    chk_wifi_show_ssid:'显示 SSID',
+    chk_wifi_show_pass:'显示密码',
+    chk_wifi_show_enc:'显示加密方式',
+    lbl_em_to:'邮箱地址',
+    lbl_em_sub:'邮件主题',
+    ph_em_sub:'请输入邮件主题',
+    lbl_em_body:'邮件正文',
+    ph_em_body:'请输入邮件正文…',
+    lbl_phone:'电话号码',
+    lbl_sms_msg:'短信内容（可选）',
+    ph_sms_msg:'预填短信文本…',
+    lbl_wa_msg:'预填消息（可选）',
+    ph_wa_msg:'您好！我看到了您的网站…',
+    lbl_loc_name:'地点名称或地址',
+    ph_loc_name:'巴黎埃菲尔铁塔',
+    lbl_loc_lat:'纬度',
+    lbl_loc_lng:'经度',
+    lbl_cal_title:'日程标题',
+    ph_cal_title:'团队会议',
+    lbl_cal_desc:'日程描述',
+    ph_cal_desc:'会议议程…',
+    lbl_cal_loc:'地点',
+    ph_cal_loc:'A 会议室',
+    lbl_cal_sd:'开始日期',
+    lbl_cal_st:'开始时间',
+    lbl_cal_ed:'结束日期',
+    lbl_cal_et:'结束时间',
+    chk_cal_allday:'全天日程',
+    lbl_vc_fn:'名字',
+    ph_vc_fn:'小明',
+    lbl_vc_ln:'姓氏',
+    ph_vc_ln:'张',
+    lbl_vc_phone:'电话',
+    lbl_vc_email:'邮箱',
+    lbl_vc_org:'公司 / 组织',
+    ph_vc_org:'示例科技有限公司',
+    lbl_vc_url:'网站',
+    lbl_dn_qrtype:'二维码类型',
+    btn_dn_static:'静态码（可重复使用）',
+    btn_dn_dynamic:'动态码（一次性）',
+    lbl_dn_acquirer:'收单机构 / 银行',
+    opt_dn_acq_default:'— 请选择收单机构 —',
+    lbl_dn_qrid:'商户 / 二维码 ID',
+    ph_dn_qrid:'例如 123456789（最多 28 个字符）',
+    lbl_dn_name:'商户名称',
+    ph_dn_name:'例如 KEDAI KOPI ALI（最多 25 个字符）',
+    lbl_dn_city:'城市',
+    ph_dn_city:'例如 KUALA LUMPUR',
+    lbl_dn_postal:'邮政编码',
+    ph_dn_postal:'例如 59200',
+    lbl_dn_mcc:'商户类别 (MCC)',
+    mcc_0000:'0000 — 个人转账 (P2P)',
+    mcc_4111:'4111 — 交通出行',
+    mcc_4511:'4511 — 航空公司',
+    mcc_4812:'4812 — 电信服务',
+    mcc_5311:'5311 — 百货商场',
+    mcc_5411:'5411 — 超市/杂货',
+    mcc_5462:'5462 — 烘焙/面包店',
+    mcc_5499:'5499 — 食品店',
+    mcc_5541:'5541 — 加油站',
+    mcc_5812:'5812 — 餐厅/咖啡馆',
+    mcc_5814:'5814 — 快餐店',
+    mcc_5912:'5912 — 药店',
+    mcc_5999:'5999 — 综合零售',
+    mcc_6010:'6010 — POS 取现',
+    mcc_6012:'6012 — 银行金融',
+    mcc_7011:'7011 — 酒店住宿',
+    mcc_7230:'7230 — 美容/美发',
+    mcc_7299:'7299 — 综合服务',
+    mcc_7832:'7832 — 电影院',
+    mcc_8011:'8011 — 医疗诊所',
+    mcc_8021:'8021 — 牙科诊所',
+    mcc_8099:'8099 — 健康服务',
+    mcc_8211:'8211 — 中小学校',
+    mcc_8220:'8220 — 高等院校',
+    mcc_9999:'9999 — 政府机构',
+    mcc_1111:'1111 — 账单缴费',
+    lbl_dn_amount:'金额（可选）',
+    ph_dn_amount:'例如 10.00',
+    btn_dn_addl:'⚙ 附加数据（可选）',
+    lbl_dn_ref:'参考标签',
+    ph_dn_ref:'参考编号',
+    lbl_dn_terminal:'终端标签',
+    ph_dn_terminal:'终端 ID',
+    lbl_dn_bill:'账单编号',
+    ph_dn_bill:'发票/账单号',
+    lbl_dn_store:'门店标签',
+    ph_dn_store:'门店编号',
+    lbl_encoded_data:'编码数据',
+    btn_copy:'复制',
+    btn_copied:'已复制！',
+    title_style_colors:'样式与颜色',
+    lbl_qr_color:'二维码颜色',
+    lbl_bg_color:'背景颜色',
+    lbl_ecc:'容错率',
+    opt_ecc_l:'低 (7%)',
+    opt_ecc_m:'中 (15%)',
+    opt_ecc_q:'较高 (25%)',
+    opt_ecc_h:'高 (30%)',
+    msg_contrast_warn:'⚠ 对比度过低 — 可能会影响扫码识别',
+    lbl_res:'分辨率',
+    lbl_tmpl:'主题模板',
+    tmpl_classic:'经典',
+    tmpl_christmas:'🎄 圣诞节',
+    tmpl_halloween:'🎃 万圣节',
+    tmpl_newyear:'🎆 新年',
+    tmpl_easter:'🥚 复活节',
+    tmpl_valentine:'💝 情人节',
+    tmpl_stpatricks:'☘️ 圣帕特里克节',
+    tmpl_birthday:'🎂 生日',
+    lbl_center_logo:'中心 Logo',
+    lbl_tap_upload:'点击上传',
+    btn_remove_logo:'✕ 移除',
+    lbl_stroke_width:'边框留白宽度 — ',
+    chk_add_outline:'添加外框线',
+    chk_invert_colors:'反转颜色',
+    btn_share:'分享',
+    lbl_cc_url:'要编码的网址 (URL)',
+    title_brand_img:'品牌图像',
+    tab_cc_fav:'网站图标',
+    tab_cc_upl:'上传图片',
+    tab_cc_iu:'图片链接',
+    desc_cc_fav:'自动从上方输入的网址获取网站图标 (Favicon)。',
+    lbl_cc_drop:'拖入图片或点击浏览上传',
+    btn_cc_adv:'⚙ 高级设置',
+    lbl_cc_shape:'码点形状',
+    opt_shp_circle:'圆形',
+    opt_shp_rrect:'圆角矩形',
+    opt_shp_sq:'方形',
+    opt_cc_ecc_h:'高',
+    opt_cc_ecc_q:'较高',
+    opt_cc_ecc_m:'中',
+    lbl_cc_osz:'输出尺寸',
+    lbl_cc_dark_range:'深色码点大小范围',
+    lbl_cc_gs:'虚影点强度',
+    lbl_cc_gt:'虚影点阈值',
+    lbl_cc_fdc:'默认深色',
+    chk_cc_col:'使用图片自身颜色',
+    btn_cc_gen:'生成炫彩码 (ChromaCode)',
+    btn_cc_generating:'正在生成…',
+    title_scan_qr:'扫描二维码',
+    btn_cam_open:'📷 打开摄像头',
+    btn_cam_close:'⏹ 关闭摄像头',
+    msg_cam_scanning:'正在扫描…',
+    msg_cam_found:'✓ 识别成功！',
+    msg_cam_privacy:'🔒 摄像头权限仅在浏览器本地使用，我们绝不录制、存储或传输任何视频。',
+    lbl_scan_drop:'拖入图片、点击浏览，或直接粘贴 (Ctrl+V)',
+    title_dn_breakdown:'🇲🇾 DuitNow 二维码详细解析',
+    title_dn_regen:'🔄 重新生成的二维码',
+    ph_dn_edit_name:'请输入商户名称',
+    lbl_dn_edit_bank:'银行 / 电子钱包',
+    ph_dn_edit_bank:'例如 Maybank, CIMB, GrabPay',
+    lbl_dn_name_fz:'商户名文字大小 — ',
+    lbl_dn_bank_fz:'银行名文字大小 — ',
+    lbl_dn_print_size:'打印尺寸',
+    sz_small:'小号',
+    sz_medium:'中号',
+    sz_large:'大号',
+    sz_counter:'收银台立牌',
+    sz_poster:'海报',
+    sz_a4:'A4 打印',
+    lbl_custom_size:'自定义：',
+    msg_dn_size_hint:'小号 = 贴纸 · 中号 = 桌卡 · 收银台立牌 = 10cm 展示牌 · 海报 = A5 · A4 打印 = 300dpi 全页',
+    btn_dn_dl_png:'📥 下载 PNG',
+    btn_dn_share:'📤 分享',
+    title_decoded_content:'解码内容',
+    btn_scan_copy:'📋 复制',
+    btn_scan_copied:'✓ 已复制！',
+    btn_scan_clear:'✕ 清除',
+    btn_open_link:'🔗 打开链接',
+    btn_call:'📞 拨打电话',
+    btn_email:'✉️ 发送邮件',
+    btn_whatsapp:'💬 WhatsApp',
+    err_url:'请输入有效的网址',
+    err_wifi_ssid:'请输入网络名称 (SSID)',
+    err_wifi_min8:'至少需要 8 个字符',
+    err_wifi_pass_req:' 加密需要输入密码',
+    err_email:'邮箱格式无效',
+    err_phone:'需输入 4–15 位数字',
+    err_sms_phone:'电话号码无效',
+    err_wa_phone:'需 7–15 位数字，不含符号',
+    err_loc_both:'需同时填写纬度和经度',
+    err_cal_title:'请输入日程标题',
+    err_cal_date:'请选择开始日期',
+    err_vc_name:'请输入姓名',
+    err_dn_acq:'请选择收单机构',
+    err_dn_qrid:'请输入二维码 ID',
+    err_dn_name:'请输入商户名称',
+    err_dn_city:'请输入城市',
+    err_dn_amt:'金额格式无效',
+    wifi_open:'开放网络',
+    dn_default_merchant:'商户',
+    cc_err_enter_url:'请输入网址',
+    cc_status_loading:'正在加载图片…',
+    cc_status_building:'正在构建不同版本的二维码…',
+    cc_err_prefix:'错误：',
+    cc_err_no_img:'未上传图片。',
+    cc_err_enter_iu:'请输入图片链接。',
+    cc_err_load_img:'无法加载图片，请尝试直接上传文件。',
+    cc_err_inv_url:'无效的网址',
+    cc_err_fav_1:'无法加载 ',
+    cc_err_fav_2:' 的网站图标，请尝试“上传图片”或“图片链接”选项卡。',
+    scan_loading:'扫码组件加载中…请稍候重试',
+    scan_found:'✓ 已识别到二维码',
+    scan_not_found:'✕ 未检测到二维码',
+    scan_try_clearer:'请尝试更清晰的图片',
+    cam_err_denied:'摄像头权限被拒绝。QR Studio 仅需摄像头权限用于扫描二维码 — 绝不录制或传输任何视频。',
+    cam_err_other:'无法访问摄像头：'
+  },
+  en:{
+    doc_title:'QR Studio — Generate & Brand QR Codes',
+    theme_light_tip:'Light theme',
+    theme_dark_tip:'Dark theme',
+    hdr_sub:'Standard & branded QR codes, zero bloat',
+    mode_std:'Standard',
+    mode_std_sub:'Classic QR codes',
+    mode_cc:'ChromaCode',
+    mode_cc_sub:'Image-blended mosaic',
+    mode_scan:'Scanner',
+    mode_scan_sub:'Read & decode QR',
+    pill_url:'URL',
+    pill_text:'Text',
+    pill_wifi:'WiFi',
+    pill_email:'Email',
+    pill_phone:'Phone',
+    pill_sms:'SMS',
+    pill_whatsapp:'WhatsApp',
+    pill_location:'Location',
+    pill_calendar:'Calendar',
+    pill_vcard:'vCard',
+    ph_in_text:'Enter any text or message…',
+    lbl_wifi_ssid:'Network name (SSID)',
+    lbl_wifi_pass:'Password',
+    ph_wifi_pass:'Min 8 characters',
+    lbl_wifi_enc:'Encryption',
+    opt_wifi_none:'None',
+    chk_wifi_hidden:'Hidden network',
+    title_wifi_below:'Display below QR code',
+    chk_wifi_show_ssid:'Show SSID',
+    chk_wifi_show_pass:'Show Password',
+    chk_wifi_show_enc:'Show Encryption',
+    lbl_em_to:'Email address',
+    lbl_em_sub:'Subject',
+    ph_em_sub:'Subject line',
+    lbl_em_body:'Body',
+    ph_em_body:'Email body…',
+    lbl_phone:'Phone number',
+    lbl_sms_msg:'Message (optional)',
+    ph_sms_msg:'Pre-filled SMS text…',
+    lbl_wa_msg:'Pre-filled message (optional)',
+    ph_wa_msg:'Hi! I saw your site…',
+    lbl_loc_name:'Location name or address',
+    ph_loc_name:'Eiffel Tower, Paris',
+    lbl_loc_lat:'Latitude',
+    lbl_loc_lng:'Longitude',
+    lbl_cal_title:'Event title',
+    ph_cal_title:'Team Meeting',
+    lbl_cal_desc:'Description',
+    ph_cal_desc:'Agenda…',
+    lbl_cal_loc:'Location',
+    ph_cal_loc:'Conference Room A',
+    lbl_cal_sd:'Start date',
+    lbl_cal_st:'Start time',
+    lbl_cal_ed:'End date',
+    lbl_cal_et:'End time',
+    chk_cal_allday:'All-day event',
+    lbl_vc_fn:'First name',
+    ph_vc_fn:'Jane',
+    lbl_vc_ln:'Last name',
+    ph_vc_ln:'Smith',
+    lbl_vc_phone:'Phone',
+    lbl_vc_email:'Email',
+    lbl_vc_org:'Organization',
+    ph_vc_org:'Acme Inc.',
+    lbl_vc_url:'Website',
+    lbl_dn_qrtype:'QR Type',
+    btn_dn_static:'Static (reusable)',
+    btn_dn_dynamic:'Dynamic (one-time)',
+    lbl_dn_acquirer:'Acquirer / Bank',
+    opt_dn_acq_default:'— Select acquirer —',
+    lbl_dn_qrid:'Merchant / QR ID',
+    ph_dn_qrid:'e.g. 123456789 (up to 28 chars)',
+    lbl_dn_name:'Merchant Name',
+    ph_dn_name:'e.g. KEDAI KOPI ALI (up to 25 chars)',
+    lbl_dn_city:'City',
+    ph_dn_city:'e.g. KUALA LUMPUR',
+    lbl_dn_postal:'Postal Code',
+    ph_dn_postal:'e.g. 59200',
+    lbl_dn_mcc:'Category (MCC)',
+    mcc_0000:'0000 — P2P Transfer',
+    mcc_4111:'4111 — Transport',
+    mcc_4511:'4511 — Airlines',
+    mcc_4812:'4812 — Telecom',
+    mcc_5311:'5311 — Department Store',
+    mcc_5411:'5411 — Grocery',
+    mcc_5462:'5462 — Bakery',
+    mcc_5499:'5499 — Food Store',
+    mcc_5541:'5541 — Fuel/Petrol',
+    mcc_5812:'5812 — Restaurant/Cafe',
+    mcc_5814:'5814 — Fast Food',
+    mcc_5912:'5912 — Pharmacy',
+    mcc_5999:'5999 — Retail (General)',
+    mcc_6010:'6010 — POS Cash Out',
+    mcc_6012:'6012 — Banking',
+    mcc_7011:'7011 — Hotel',
+    mcc_7230:'7230 — Beauty/Barber',
+    mcc_7299:'7299 — Services',
+    mcc_7832:'7832 — Cinema',
+    mcc_8011:'8011 — Medical',
+    mcc_8021:'8021 — Dental',
+    mcc_8099:'8099 — Health Services',
+    mcc_8211:'8211 — School',
+    mcc_8220:'8220 — University',
+    mcc_9999:'9999 — Government',
+    mcc_1111:'1111 — Bill Payment',
+    lbl_dn_amount:'Amount (optional)',
+    ph_dn_amount:'e.g. 10.00',
+    btn_dn_addl:'⚙ Additional Data (optional)',
+    lbl_dn_ref:'Reference Label',
+    ph_dn_ref:'Reference',
+    lbl_dn_terminal:'Terminal Label',
+    ph_dn_terminal:'Terminal ID',
+    lbl_dn_bill:'Bill Number',
+    ph_dn_bill:'Invoice #',
+    lbl_dn_store:'Store Label',
+    ph_dn_store:'Store #',
+    lbl_encoded_data:'Encoded data',
+    btn_copy:'Copy',
+    btn_copied:'Copied!',
+    title_style_colors:'Style & Colors',
+    lbl_qr_color:'QR color',
+    lbl_bg_color:'Background',
+    lbl_ecc:'Error correction',
+    opt_ecc_l:'Low (7%)',
+    opt_ecc_m:'Medium (15%)',
+    opt_ecc_q:'Quartile (25%)',
+    opt_ecc_h:'High (30%)',
+    msg_contrast_warn:'⚠ Low contrast — may affect scanning',
+    lbl_res:'Resolution',
+    lbl_tmpl:'Template',
+    tmpl_classic:'Classic',
+    tmpl_christmas:'🎄 Christmas',
+    tmpl_halloween:'🎃 Halloween',
+    tmpl_newyear:'🎆 New Year',
+    tmpl_easter:'🥚 Easter',
+    tmpl_valentine:'💝 Valentine',
+    tmpl_stpatricks:"☘️ St. Patrick's",
+    tmpl_birthday:'🎂 Birthday',
+    lbl_center_logo:'Center logo',
+    lbl_tap_upload:'Tap to upload',
+    btn_remove_logo:'✕ Remove',
+    lbl_stroke_width:'Stroke width — ',
+    chk_add_outline:'Add outline',
+    chk_invert_colors:'Invert colors',
+    btn_share:'Share',
+    lbl_cc_url:'URL to encode',
+    title_brand_img:'Brand Image',
+    tab_cc_fav:'Favicon',
+    tab_cc_upl:'Upload',
+    tab_cc_iu:'Image URL',
+    desc_cc_fav:"Auto-fetches the site's favicon from the URL above.",
+    lbl_cc_drop:'Drop image or tap to browse',
+    btn_cc_adv:'⚙ Advanced Settings',
+    lbl_cc_shape:'Dot shape',
+    opt_shp_circle:'Circle',
+    opt_shp_rrect:'Rounded',
+    opt_shp_sq:'Square',
+    opt_cc_ecc_h:'High',
+    opt_cc_ecc_q:'Quartile',
+    opt_cc_ecc_m:'Medium',
+    lbl_cc_osz:'Output size',
+    lbl_cc_dark_range:'Dark dot range',
+    lbl_cc_gs:'Ghost strength',
+    lbl_cc_gt:'Ghost threshold',
+    lbl_cc_fdc:'Fallback dark',
+    chk_cc_col:'Use image colors',
+    btn_cc_gen:'Generate ChromaCode',
+    btn_cc_generating:'Generating…',
+    title_scan_qr:'Scan QR Code',
+    btn_cam_open:'📷 Open Camera',
+    btn_cam_close:'⏹ Close Camera',
+    msg_cam_scanning:'Scanning…',
+    msg_cam_found:'✓ Found!',
+    msg_cam_privacy:'🔒 Camera access stays in your browser. We never record, store, or transmit video.',
+    lbl_scan_drop:'Drop image, tap to browse, or paste (Ctrl+V)',
+    title_dn_breakdown:'🇲🇾 DuitNow QR Breakdown',
+    title_dn_regen:'🔄 Regenerated QR',
+    ph_dn_edit_name:'Merchant name',
+    lbl_dn_edit_bank:'Bank / Wallet',
+    ph_dn_edit_bank:'e.g. Maybank, CIMB, GrabPay',
+    lbl_dn_name_fz:'Name font size — ',
+    lbl_dn_bank_fz:'Bank font size — ',
+    lbl_dn_print_size:'Print Size',
+    sz_small:'Small',
+    sz_medium:'Medium',
+    sz_large:'Large',
+    sz_counter:'Counter',
+    sz_poster:'Poster',
+    sz_a4:'A4 Print',
+    lbl_custom_size:'Custom:',
+    msg_dn_size_hint:'Small = sticker · Medium = table card · Counter = 10cm display · Poster = A5 · A4 Print = 300dpi full page',
+    btn_dn_dl_png:'📥 Download PNG',
+    btn_dn_share:'📤 Share',
+    title_decoded_content:'Decoded Content',
+    btn_scan_copy:'📋 Copy',
+    btn_scan_copied:'✓ Copied!',
+    btn_scan_clear:'✕ Clear',
+    btn_open_link:'🔗 Open Link',
+    btn_call:'📞 Call',
+    btn_email:'✉️ Email',
+    btn_whatsapp:'💬 WhatsApp',
+    err_url:'Enter a valid URL',
+    err_wifi_ssid:'SSID required',
+    err_wifi_min8:'Min 8 characters',
+    err_wifi_pass_req:'Password required for ',
+    err_email:'Invalid email',
+    err_phone:'4–15 digits required',
+    err_sms_phone:'Invalid phone',
+    err_wa_phone:'7–15 digits, no symbols',
+    err_loc_both:'Need both lat & lng',
+    err_cal_title:'Title required',
+    err_cal_date:'Date required',
+    err_vc_name:'Name required',
+    err_dn_acq:'Select an acquirer',
+    err_dn_qrid:'QR ID required',
+    err_dn_name:'Merchant name required',
+    err_dn_city:'City required',
+    err_dn_amt:'Invalid amount',
+    wifi_open:'Open',
+    dn_default_merchant:'Merchant',
+    cc_err_enter_url:'Enter a URL',
+    cc_status_loading:'Loading image…',
+    cc_status_building:'Building QR versions…',
+    cc_err_prefix:'Error: ',
+    cc_err_no_img:'No image uploaded.',
+    cc_err_enter_iu:'Enter an image URL.',
+    cc_err_load_img:'Cannot load image. Try uploading instead.',
+    cc_err_inv_url:'Invalid URL',
+    cc_err_fav_1:'Cannot load favicon for ',
+    cc_err_fav_2:'. Try Upload or Image URL tab.',
+    scan_loading:'Scanner loading…try again in a moment',
+    scan_found:'✓ QR code found',
+    scan_not_found:'✕ No QR code detected',
+    scan_try_clearer:'Try a clearer image',
+    cam_err_denied:'Camera permission denied. QR Studio needs camera access only to scan QR codes — no video is recorded or transmitted.',
+    cam_err_other:'Could not access camera: '
+  }
+};
+const I18N_HTML={
+  zh:{
+    'i18n-dn-intro':`<span style="color:#ED2E67;font-weight:600">🇲🇾 DuitNow 二维码生成器</span> — 根据 <a href="https://docs.developer.paynet.my/docs/duitNow-QR/integration/QR-generation-specification/merchant-presented-mode/qr-data-object" target="_blank" style="color:var(--accent);text-decoration:none">PayNet QR 规范 v1.5</a> 构建结构合规的 EMV 二维码字符串。<div style="margin-top:8px;padding:8px 12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:8px;font-size:.72rem;color:var(--warn)"><strong>⚠ 此二维码不可用于真实收款。</strong> 商户/二维码 ID 必须是通过 PayNet 在收单银行注册的真实 ID。生成的二维码具有正确的格式和 CRC 校验码，但不会被支付网络识别，仅供开发者测试 EMV 解析器或了解 DuitNow 二维码结构。详见 <a href="https://github.com/natsu90/emvqr/issues/1" target="_blank" style="color:var(--warn);text-decoration:underline">natsu90 的研究</a>。</div>`,
+    'i18n-std-ecc-tip':`<strong>越高越可靠。</strong>二维码会存储备份数据，即使部分受损也能正常识别。<br><br><strong>L (7%)</strong> — 二维码最简洁，保护最低。<br><strong>M (15%)</strong> — 推荐默认选项。<br><strong>Q (25%)</strong> — 添加 Logo 时推荐使用。<br><strong>H (30%)</strong> — 最高恢复能力，码点最密。`,
+    'i18n-cc-ecc-tip':`<strong>越高越可靠。</strong>炫彩码会对码点进行大幅调整，建议选择<strong>高</strong>。<br><br><strong>H (30%)</strong> — 最适合炫彩码。<br><strong>Q (25%)</strong> — 适合简单 Logo。<br><strong>M (15%)</strong> — 图像融合时存在识别风险。`,
+    'i18n-scan-desc':`通过<strong>摄像头</strong>、<strong>图片文件</strong>或<strong>剪贴板粘贴</strong>解码任意二维码。所有处理均在本地完成 — 数据绝不会离开您的浏览器。<br><span style="color:var(--accent);font-weight:500">🇲🇾 完整 DuitNow 二维码解析</span> — 支持 PayNet 官方名录中的 70 家收单机构/银行、CRC 校验、小费/手续费解析及高清二维码重新生成。`,
+    'i18n-dn-credits':`EMV 二维码研究：<a href="https://github.com/natsu90/duitnowqr-test" target="_blank" style="color:var(--accent);text-decoration:none">natsu90</a> · 收单机构列表源自 <a href="https://docs.developer.paynet.my/docs/duitNow-QR/integration/QR-generation-specification/merchant-presented-mode/qr-data-object" target="_blank" style="color:var(--accent);text-decoration:none">PayNet QR 规范 v1.5</a> · <a href="https://docs.developer.paynet.my/docs" target="_blank" style="color:var(--accent);text-decoration:none">PayNet 开发者文档</a> · DuitNow 是 <a href="https://www.paynet.my" target="_blank" style="color:var(--accent);text-decoration:none">PayNet Malaysia</a> 旗下产品`,
+    'i18n-footer':`QR Studio 作者 <a href="https://github.com/deadboy18" target="_blank">deadboy18</a> · ChromaCode 作者 <a href="https://github.com/TomsNimanis/chromacode" target="_blank">Toms Nimanis / IT Linden</a> · DuitNow 研究 <a href="https://github.com/natsu90/duitnowqr-test" target="_blank">natsu90</a> · <a href="https://docs.developer.paynet.my/docs" target="_blank">PayNet 开发者文档</a><br>特别鸣谢 <a href="https://github.com/VenimK" target="_blank">VenimK</a> ❤️`
+  },
+  en:{
+    'i18n-dn-intro':`<span style="color:#ED2E67;font-weight:600">🇲🇾 DuitNow QR Generator</span> — Builds structurally valid EMV QR strings per <a href="https://docs.developer.paynet.my/docs/duitNow-QR/integration/QR-generation-specification/merchant-presented-mode/qr-data-object" target="_blank" style="color:var(--accent);text-decoration:none">PayNet QR Spec v1.5</a>.<div style="margin-top:8px;padding:8px 12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:8px;font-size:.72rem;color:var(--warn)"><strong>⚠ This won't process real payments.</strong> The Merchant/QR ID must be a real ID registered with an acquirer bank through PayNet. Generated QR codes have correct format & CRC but are not recognized by the payment network. Useful for developers testing EMV parsers or learning how DuitNow QR is structured. See <a href="https://github.com/natsu90/emvqr/issues/1" target="_blank" style="color:var(--warn);text-decoration:underline">natsu90's research</a>.</div>`,
+    'i18n-std-ecc-tip':`<strong>Higher = more reliable.</strong> Your QR stores backup data so it scans even if damaged.<br><br><strong>L (7%)</strong> — Smallest QR, least protection.<br><strong>M (15%)</strong> — Good default.<br><strong>Q (25%)</strong> — Recommended with logos.<br><strong>H (30%)</strong> — Maximum recovery, densest code.`,
+    'i18n-cc-ecc-tip':`<strong>Higher = more reliable.</strong> ChromaCode modifies dots heavily, so <strong>High</strong> is recommended.<br><br><strong>H (30%)</strong> — Best for ChromaCode.<br><strong>Q (25%)</strong> — OK for simple logos.<br><strong>M (15%)</strong> — Risky with blending.`,
+    'i18n-scan-desc':`Decode any QR code from your <strong>camera</strong>, an <strong>image file</strong>, or <strong>paste</strong> from clipboard. Everything is processed locally — nothing leaves your browser.<br><span style="color:var(--accent);font-weight:500">🇲🇾 Full DuitNow QR breakdown</span> — 70 acquirers/banks from PayNet's official registry, CRC verification, tip/fee parsing & clean QR regeneration.`,
+    'i18n-dn-credits':`EMV QR research by <a href="https://github.com/natsu90/duitnowqr-test" target="_blank" style="color:var(--accent);text-decoration:none">natsu90</a> · Acquirer list from <a href="https://docs.developer.paynet.my/docs/duitNow-QR/integration/QR-generation-specification/merchant-presented-mode/qr-data-object" target="_blank" style="color:var(--accent);text-decoration:none">PayNet QR Spec v1.5</a> · <a href="https://docs.developer.paynet.my/docs" target="_blank" style="color:var(--accent);text-decoration:none">PayNet Developer Docs</a> · DuitNow is a product of <a href="https://www.paynet.my" target="_blank" style="color:var(--accent);text-decoration:none">PayNet Malaysia</a>`,
+    'i18n-footer':`QR Studio by <a href="https://github.com/deadboy18" target="_blank">deadboy18</a> · ChromaCode by <a href="https://github.com/TomsNimanis/chromacode" target="_blank">Toms Nimanis / IT Linden</a> · DuitNow research by <a href="https://github.com/natsu90/duitnowqr-test" target="_blank">natsu90</a> · <a href="https://docs.developer.paynet.my/docs" target="_blank">PayNet Developer Docs</a><br>Special thanks to <a href="https://github.com/VenimK" target="_blank">VenimK</a> ❤️`
+  }
+};
+const CC_ZH_NAMES={US:'美国',GB:'英国',CA:'加拿大',AU:'澳大利亚',AF:'阿富汗',AL:'阿尔巴尼亚',DZ:'阿尔及利亚',AD:'安道尔',AO:'安哥拉',AR:'阿根廷',AM:'亚美尼亚',AT:'奥地利',AZ:'阿塞拜疆',BH:'巴林',BD:'孟加拉国',BY:'白俄罗斯',BE:'比利时',BZ:'伯利兹',BJ:'贝宁',BT:'不丹',BO:'玻利维亚',BA:'波黑',BW:'博茨瓦纳',BR:'巴西',BN:'文莱',BG:'保加利亚',KH:'柬埔寨',CM:'喀麦隆',CL:'智利',CN:'中国',CO:'哥伦比亚',CR:'哥斯达黎加',HR:'克罗地亚',CU:'古巴',CY:'塞浦路斯',CZ:'捷克',DK:'丹麦',DO:'多米尼加',EC:'厄瓜多尔',EG:'埃及',SV:'萨尔瓦多',EE:'爱沙尼亚',ET:'埃塞俄比亚',FI:'芬兰',FR:'法国',GE:'格鲁吉亚',DE:'德国',GH:'加纳',GR:'希腊',GT:'危地马拉',HT:'海地',HN:'洪都拉斯',HK:'中国香港',HU:'匈牙利',IS:'冰岛',IN:'印度',ID:'印度尼西亚',IR:'伊朗',IQ:'伊拉克',IE:'爱尔兰',IL:'以色列',IT:'意大利',JM:'牙买加',JP:'日本',JO:'约旦',KZ:'哈萨克斯坦',KE:'肯尼亚',KR:'韩国',KW:'科威特',KG:'吉尔吉斯斯坦',LV:'拉脱维亚',LB:'黎巴嫩',LY:'利比亚',LT:'立陶宛',LU:'卢森堡',MY:'马来西亚',MV:'马尔代夫',MT:'马耳他',MX:'墨西哥',MD:'摩尔多瓦',MC:'摩纳哥',MN:'蒙古',ME:'黑山',MA:'摩洛哥',MZ:'莫桑比克',MM:'缅甸',NA:'纳米比亚',NP:'尼泊尔',NL:'荷兰',NZ:'新西兰',NI:'尼加拉瓜',NG:'尼日利亚',MK:'北马其顿',NO:'挪威',OM:'阿曼',PK:'巴基斯坦',PS:'巴勒斯坦',PA:'巴拿马',PY:'巴拉圭',PE:'秘鲁',PH:'菲律宾',PL:'波兰',PT:'葡萄牙',PR:'波多黎各',QA:'卡塔尔',RO:'罗马尼亚',RU:'俄罗斯',SA:'沙特阿拉伯',SN:'塞内加尔',RS:'塞尔维亚',SG:'新加坡',SK:'斯洛伐克',SI:'斯洛文尼亚',SO:'索马里',ZA:'南非',ES:'西班牙',LK:'斯里兰卡',SD:'苏丹',SE:'瑞典',CH:'瑞士',TW:'中国台湾',TZ:'坦桑尼亚',TH:'泰国',TN:'突尼斯',TR:'土耳其',UA:'乌克兰',AE:'阿联酋',UY:'乌拉圭',UZ:'乌兹别克斯坦',VE:'委内瑞拉',VN:'越南',YE:'也门',ZM:'赞比亚',ZW:'津巴布韦'};
+
+function t(k){return(I18N[curLang]&&I18N[curLang][k])||I18N.en[k]||k}
+function handleLangClick(lang){setLang(curLang===lang?(curLang==='zh'?'en':'zh'):lang)}
+function setLang(lang){
+  curLang=lang==='en'?'en':'zh';
+  document.documentElement.setAttribute('lang',curLang==='zh'?'zh-CN':'en');
+  document.documentElement.setAttribute('data-lang',curLang);
+  document.title=t('doc_title');
+  document.getElementById('lang-zh').classList.toggle('on',curLang==='zh');
+  document.getElementById('lang-en').classList.toggle('on',curLang==='en');
+  document.getElementById('theme-light').title=t('theme_light_tip');
+  document.getElementById('theme-dark').title=t('theme_dark_tip');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(k==='lbl_tap_upload'&&stdLogoData)return;
+    if(k==='lbl_cc_drop'&&ccUploadedFile)return;
+    if(k==='btn_cam_open'){el.textContent=camRunning?t('btn_cam_close'):t('btn_cam_open');return}
+    if(k==='lbl_scan_drop'&&scanResultData)return;
+    el.textContent=t(k);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const k=el.getAttribute('data-i18n-ph');
+    el.setAttribute('placeholder',t(k));
+  });
+  const htmlMap=I18N_HTML[curLang]||I18N_HTML.zh;
+  for(const[id,val]of Object.entries(htmlMap)){
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=val;
+  }
+  ['ph-cc','sms-cc','wa-cc','vc-cc'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(sel)fillCC(sel);
+  });
+  liveGenerate();
+  if(scanResultData){
+    showScanResult(scanResultData,true);
+    if(document.getElementById('duitnow-regen').style.display==='block')regenDuitNow();
+  }
+}
+
 // ═══════ THEME ═══════
 function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('theme-light').classList.toggle('on',t==='light');document.getElementById('theme-dark').classList.toggle('on',t==='dark');try{localStorage.setItem('qr-theme',t)}catch{}}
 (()=>{try{const t=localStorage.getItem('qr-theme');if(t)setTheme(t)}catch{}})();
@@ -367,7 +919,7 @@ function setMode(m){document.querySelectorAll('.mode-btn').forEach(b=>b.classLis
 // ═══════ COUNTRY CODES ═══════
 function flagEmoji(cc){return String.fromCodePoint(...cc.toUpperCase().split('').map(c=>127397+c.charCodeAt(0)))}
 const CC_RAW=[['US','1','USA'],['GB','44','UK'],['CA','1','Canada'],['AU','61','Australia'],['AF','93','Afghanistan'],['AL','355','Albania'],['DZ','213','Algeria'],['AD','376','Andorra'],['AO','244','Angola'],['AR','54','Argentina'],['AM','374','Armenia'],['AT','43','Austria'],['AZ','994','Azerbaijan'],['BH','973','Bahrain'],['BD','880','Bangladesh'],['BY','375','Belarus'],['BE','32','Belgium'],['BZ','501','Belize'],['BJ','229','Benin'],['BT','975','Bhutan'],['BO','591','Bolivia'],['BA','387','Bosnia'],['BW','267','Botswana'],['BR','55','Brazil'],['BN','673','Brunei'],['BG','359','Bulgaria'],['KH','855','Cambodia'],['CM','237','Cameroon'],['CL','56','Chile'],['CN','86','China'],['CO','57','Colombia'],['CR','506','Costa Rica'],['HR','385','Croatia'],['CU','53','Cuba'],['CY','357','Cyprus'],['CZ','420','Czech Republic'],['DK','45','Denmark'],['DO','1809','Dominican Rep.'],['EC','593','Ecuador'],['EG','20','Egypt'],['SV','503','El Salvador'],['EE','372','Estonia'],['ET','251','Ethiopia'],['FI','358','Finland'],['FR','33','France'],['GE','995','Georgia'],['DE','49','Germany'],['GH','233','Ghana'],['GR','30','Greece'],['GT','502','Guatemala'],['HT','509','Haiti'],['HN','504','Honduras'],['HK','852','Hong Kong'],['HU','36','Hungary'],['IS','354','Iceland'],['IN','91','India'],['ID','62','Indonesia'],['IR','98','Iran'],['IQ','964','Iraq'],['IE','353','Ireland'],['IL','972','Israel'],['IT','39','Italy'],['JM','1876','Jamaica'],['JP','81','Japan'],['JO','962','Jordan'],['KZ','7','Kazakhstan'],['KE','254','Kenya'],['KR','82','Korea (South)'],['KW','965','Kuwait'],['KG','996','Kyrgyzstan'],['LV','371','Latvia'],['LB','961','Lebanon'],['LY','218','Libya'],['LT','370','Lithuania'],['LU','352','Luxembourg'],['MY','60','Malaysia'],['MV','960','Maldives'],['MT','356','Malta'],['MX','52','Mexico'],['MD','373','Moldova'],['MC','377','Monaco'],['MN','976','Mongolia'],['ME','382','Montenegro'],['MA','212','Morocco'],['MZ','258','Mozambique'],['MM','95','Myanmar'],['NA','264','Namibia'],['NP','977','Nepal'],['NL','31','Netherlands'],['NZ','64','New Zealand'],['NI','505','Nicaragua'],['NG','234','Nigeria'],['MK','389','N. Macedonia'],['NO','47','Norway'],['OM','968','Oman'],['PK','92','Pakistan'],['PS','970','Palestine'],['PA','507','Panama'],['PY','595','Paraguay'],['PE','51','Peru'],['PH','63','Philippines'],['PL','48','Poland'],['PT','351','Portugal'],['PR','1787','Puerto Rico'],['QA','974','Qatar'],['RO','40','Romania'],['RU','7','Russia'],['SA','966','Saudi Arabia'],['SN','221','Senegal'],['RS','381','Serbia'],['SG','65','Singapore'],['SK','421','Slovakia'],['SI','386','Slovenia'],['SO','252','Somalia'],['ZA','27','South Africa'],['ES','34','Spain'],['LK','94','Sri Lanka'],['SD','249','Sudan'],['SE','46','Sweden'],['CH','41','Switzerland'],['TW','886','Taiwan'],['TZ','255','Tanzania'],['TH','66','Thailand'],['TN','216','Tunisia'],['TR','90','Turkey'],['UA','380','Ukraine'],['AE','971','UAE'],['UY','598','Uruguay'],['UZ','998','Uzbekistan'],['VE','58','Venezuela'],['VN','84','Vietnam'],['YE','967','Yemen'],['ZM','260','Zambia'],['ZW','263','Zimbabwe']];
-function fillCC(sel){CC_RAW.forEach(([iso,code,name])=>{const o=document.createElement('option');o.value='+'+code;o.textContent=`${flagEmoji(iso)} +${code} ${name}`;sel.appendChild(o)})}
+function fillCC(sel){const prev=sel.value;sel.innerHTML='';CC_RAW.forEach(([iso,code,name])=>{const o=document.createElement('option');o.value='+'+code;const cName=curLang==='zh'?(CC_ZH_NAMES[iso]||name):name;o.textContent=`${flagEmoji(iso)} +${code} ${cName}`;sel.appendChild(o)});if(prev)sel.value=prev}
 ['ph-cc','sms-cc','wa-cc','vc-cc'].forEach(id=>fillCC(document.getElementById(id)));
 
 // ═══════ TYPE PILLS ═══════
@@ -379,7 +931,7 @@ const stdLogoDz=document.getElementById('std-logo-dz'),stdLogoFi=document.getEle
 stdLogoDz.onclick=()=>stdLogoFi.click();
 stdLogoFi.onchange=e=>loadStdLogo(e.target.files[0]);
 function loadStdLogo(f){if(!f||!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=e=>{stdLogoData=e.target.result;const img=new Image();img.onload=()=>{stdLogoImg=img;liveGenerate()};img.src=stdLogoData;document.getElementById('std-logo-preview').src=stdLogoData;document.getElementById('std-logo-strip').style.display='flex';document.getElementById('std-logo-prompt').textContent=f.name};r.readAsDataURL(f)}
-function clearStdLogo(){stdLogoData=null;stdLogoImg=null;document.getElementById('std-logo-strip').style.display='none';document.getElementById('std-logo-prompt').textContent='Tap to upload';stdLogoFi.value='';liveGenerate()}
+function clearStdLogo(){stdLogoData=null;stdLogoImg=null;document.getElementById('std-logo-strip').style.display='none';document.getElementById('std-logo-prompt').textContent=t('lbl_tap_upload');stdLogoFi.value='';liveGenerate()}
 function toggleWifiEye(){const inp=document.getElementById('wifi-pass');const btn=document.getElementById('wifi-eye');if(inp.type==='password'){inp.type='text';btn.textContent='🙈'}else{inp.type='password';btn.textContent='👁️‍🗨️'}}
 
 // ═══════ COLORS ═══════
@@ -400,23 +952,23 @@ function validateAll(){
   document.querySelectorAll('.val-msg').forEach(el=>{el.textContent='';el.className='val-msg'});
   document.querySelectorAll('.inp.invalid,.inp.valid').forEach(el=>el.classList.remove('invalid','valid'));
   switch(type){
-    case 'url':{let v=document.getElementById('in-url').value.trim();if(!v){valid=false;break}if(!/^https?:\/\//i.test(v)&&v.includes('.'))v='https://'+v;if(!isUrl(v)){valid=false;vMsg('v-url','Enter a valid URL','err');document.getElementById('in-url').classList.add('invalid')}else document.getElementById('in-url').classList.add('valid');break}
+    case 'url':{let v=document.getElementById('in-url').value.trim();if(!v){valid=false;break}if(!/^https?:\/\//i.test(v)&&v.includes('.'))v='https://'+v;if(!isUrl(v)){valid=false;vMsg('v-url',t('err_url'),'err');document.getElementById('in-url').classList.add('invalid')}else document.getElementById('in-url').classList.add('valid');break}
     case 'text':if(!document.getElementById('in-text').value.trim())valid=false;break;
-    case 'wifi':{const s=document.getElementById('wifi-ssid').value.trim(),p=document.getElementById('wifi-pass').value,enc=document.getElementById('wifi-enc').value;if(!s){valid=false;vMsg('v-wifi-ssid','SSID required','err');document.getElementById('wifi-ssid').classList.add('invalid')}else document.getElementById('wifi-ssid').classList.add('valid');if(enc&&p.length>0&&p.length<8){valid=false;vMsg('v-wifi-pass','Min 8 characters','err');document.getElementById('wifi-pass').classList.add('invalid')}else if(enc&&!p){valid=false;vMsg('v-wifi-pass','Password required for '+enc,'err');document.getElementById('wifi-pass').classList.add('invalid')}else if(enc&&p.length>=8)document.getElementById('wifi-pass').classList.add('valid');break}
-    case 'email':{const to=document.getElementById('em-to').value.trim();if(!to){valid=false;break}if(!isEmail(to)){valid=false;vMsg('v-em-to','Invalid email','err');document.getElementById('em-to').classList.add('invalid')}else document.getElementById('em-to').classList.add('valid');break}
-    case 'phone':{const ph=document.getElementById('in-phone').value.trim();if(!ph){valid=false;break}if(!isPhone(ph)){valid=false;vMsg('v-phone','4–15 digits required','err');document.getElementById('in-phone').classList.add('invalid')}else document.getElementById('in-phone').classList.add('valid');break}
-    case 'sms':{const ph=document.getElementById('sms-phone').value.trim();if(!ph){valid=false;break}if(!isPhone(ph)){valid=false;vMsg('v-sms-phone','Invalid phone','err');document.getElementById('sms-phone').classList.add('invalid')}else document.getElementById('sms-phone').classList.add('valid');break}
-    case 'whatsapp':{const ph=document.getElementById('wa-phone').value.trim();if(!ph){valid=false;break}if(!/^\d{7,15}$/.test(ph.replace(/[\s\-]/g,''))){valid=false;vMsg('v-wa-phone','7–15 digits, no symbols','err');document.getElementById('wa-phone').classList.add('invalid')}else document.getElementById('wa-phone').classList.add('valid');break}
-    case 'location':{const n=document.getElementById('loc-name').value.trim(),la=document.getElementById('loc-lat').value.trim(),ln=document.getElementById('loc-lng').value.trim();if(!n&&!la&&!ln)valid=false;if((la&&!ln)||(!la&&ln)){valid=false;vMsg('v-loc','Need both lat & lng','warn')}break}
-    case 'calendar':{if(!document.getElementById('cal-title').value.trim()){valid=false;vMsg('v-cal-title','Title required','err')}if(!document.getElementById('cal-sd').value){valid=false;vMsg('v-cal-sd','Date required','err')}break}
-    case 'vcard':{if(!document.getElementById('vc-fn').value.trim()&&!document.getElementById('vc-ln').value.trim()){valid=false;vMsg('v-vc-name','Name required','err')}const em=document.getElementById('vc-email').value.trim();if(em&&!isEmail(em)){valid=false;vMsg('v-vc-email','Invalid email','err')}break}
+    case 'wifi':{const s=document.getElementById('wifi-ssid').value.trim(),p=document.getElementById('wifi-pass').value,enc=document.getElementById('wifi-enc').value;if(!s){valid=false;vMsg('v-wifi-ssid',t('err_wifi_ssid'),'err');document.getElementById('wifi-ssid').classList.add('invalid')}else document.getElementById('wifi-ssid').classList.add('valid');if(enc&&p.length>0&&p.length<8){valid=false;vMsg('v-wifi-pass',t('err_wifi_min8'),'err');document.getElementById('wifi-pass').classList.add('invalid')}else if(enc&&!p){valid=false;vMsg('v-wifi-pass',curLang==='zh'?(enc+t('err_wifi_pass_req')):(t('err_wifi_pass_req')+enc),'err');document.getElementById('wifi-pass').classList.add('invalid')}else if(enc&&p.length>=8)document.getElementById('wifi-pass').classList.add('valid');break}
+    case 'email':{const to=document.getElementById('em-to').value.trim();if(!to){valid=false;break}if(!isEmail(to)){valid=false;vMsg('v-em-to',t('err_email'),'err');document.getElementById('em-to').classList.add('invalid')}else document.getElementById('em-to').classList.add('valid');break}
+    case 'phone':{const ph=document.getElementById('in-phone').value.trim();if(!ph){valid=false;break}if(!isPhone(ph)){valid=false;vMsg('v-phone',t('err_phone'),'err');document.getElementById('in-phone').classList.add('invalid')}else document.getElementById('in-phone').classList.add('valid');break}
+    case 'sms':{const ph=document.getElementById('sms-phone').value.trim();if(!ph){valid=false;break}if(!isPhone(ph)){valid=false;vMsg('v-sms-phone',t('err_sms_phone'),'err');document.getElementById('sms-phone').classList.add('invalid')}else document.getElementById('sms-phone').classList.add('valid');break}
+    case 'whatsapp':{const ph=document.getElementById('wa-phone').value.trim();if(!ph){valid=false;break}if(!/^\d{7,15}$/.test(ph.replace(/[\s\-]/g,''))){valid=false;vMsg('v-wa-phone',t('err_wa_phone'),'err');document.getElementById('wa-phone').classList.add('invalid')}else document.getElementById('wa-phone').classList.add('valid');break}
+    case 'location':{const n=document.getElementById('loc-name').value.trim(),la=document.getElementById('loc-lat').value.trim(),ln=document.getElementById('loc-lng').value.trim();if(!n&&!la&&!ln)valid=false;if((la&&!ln)||(!la&&ln)){valid=false;vMsg('v-loc',t('err_loc_both'),'warn')}break}
+    case 'calendar':{if(!document.getElementById('cal-title').value.trim()){valid=false;vMsg('v-cal-title',t('err_cal_title'),'err')}if(!document.getElementById('cal-sd').value){valid=false;vMsg('v-cal-sd',t('err_cal_date'),'err')}break}
+    case 'vcard':{if(!document.getElementById('vc-fn').value.trim()&&!document.getElementById('vc-ln').value.trim()){valid=false;vMsg('v-vc-name',t('err_vc_name'),'err')}const em=document.getElementById('vc-email').value.trim();if(em&&!isEmail(em)){valid=false;vMsg('v-vc-email',t('err_email'),'err')}break}
     case 'duitnow':{
-      if(!document.getElementById('dn-gen-acquirer').value){valid=false;vMsg('v-dn-acquirer','Select an acquirer','err')}
-      if(!document.getElementById('dn-gen-qrid').value.trim()){valid=false;vMsg('v-dn-qrid','QR ID required','err')}
-      if(!document.getElementById('dn-gen-name').value.trim()){valid=false;vMsg('v-dn-name','Merchant name required','err')}
-      if(!document.getElementById('dn-gen-city').value.trim()){valid=false;vMsg('v-dn-city','City required','err')}
+      if(!document.getElementById('dn-gen-acquirer').value){valid=false;vMsg('v-dn-acquirer',t('err_dn_acq'),'err')}
+      if(!document.getElementById('dn-gen-qrid').value.trim()){valid=false;vMsg('v-dn-qrid',t('err_dn_qrid'),'err')}
+      if(!document.getElementById('dn-gen-name').value.trim()){valid=false;vMsg('v-dn-name',t('err_dn_name'),'err')}
+      if(!document.getElementById('dn-gen-city').value.trim()){valid=false;vMsg('v-dn-city',t('err_dn_city'),'err')}
       const amt=document.getElementById('dn-gen-amount').value;
-      if(amt&&(isNaN(parseFloat(amt))||parseFloat(amt)<0)){valid=false;vMsg('v-dn-amount','Invalid amount','err')}
+      if(amt&&(isNaN(parseFloat(amt))||parseFloat(amt)<0)){valid=false;vMsg('v-dn-amount',t('err_dn_amt'),'err')}
       break}
   }
   return valid;
@@ -498,7 +1050,9 @@ function setDnGenType(v){document.querySelectorAll('.dn-gen-type').forEach(b=>b.
 
 // ═══════ LINK BOX ═══════
 function updateLinkBox(d){const b=document.getElementById('std-link-box'),v=document.getElementById('std-link-val');if(!d){b.classList.remove('on');return}v.textContent=d;b.classList.add('on')}
-function copyLink(){navigator.clipboard.writeText(document.getElementById('std-link-val').textContent).then(()=>{const b=document.querySelector('#std-link-box .copy-btn');b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1500)})}
+function copyTextSafe(txt,cb){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(cb).catch(()=>fallbackCopy(txt,cb))}else fallbackCopy(txt,cb)}
+function fallbackCopy(txt,cb){try{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();if(cb)cb()}catch{}}
+function copyLink(){copyTextSafe(document.getElementById('std-link-val').textContent,()=>{const b=document.querySelector('#std-link-box .copy-btn');b.textContent=t('btn_copied');setTimeout(()=>b.textContent=t('btn_copy'),1500)})}
 
 // ═══════ LIVE GENERATE ═══════
 let _genTimer=null;
@@ -519,7 +1073,7 @@ function generateStandard(){
   const modules=qr.getModuleCount(),canvas=document.getElementById('std-canvas');
   const quietMod=Math.round(modules*stroke),totalMod=modules+quietMod*2,scale=Math.max(1,Math.floor(res/totalMod)),realSize=totalMod*scale;
   let wifiLines=[];
-  if(curType==='wifi'){if(document.getElementById('wifi-show-ssid').checked){const v=document.getElementById('wifi-ssid').value.trim();if(v)wifiLines.push('📶  '+v)}if(document.getElementById('wifi-show-pass').checked){const v=document.getElementById('wifi-pass').value;if(v)wifiLines.push('🔑  '+v)}if(document.getElementById('wifi-show-enc').checked){wifiLines.push('🔒  '+(document.getElementById('wifi-enc').value||'Open'))}}
+  if(curType==='wifi'){if(document.getElementById('wifi-show-ssid').checked){const v=document.getElementById('wifi-ssid').value.trim();if(v)wifiLines.push('📶  '+v)}if(document.getElementById('wifi-show-pass').checked){const v=document.getElementById('wifi-pass').value;if(v)wifiLines.push('🔑  '+v)}if(document.getElementById('wifi-show-enc').checked){wifiLines.push('🔒  '+(document.getElementById('wifi-enc').value||t('wifi_open')))}}
   const lineH=Math.round(realSize*.06),textPad=wifiLines.length?Math.round(lineH*.6):0,extraH=wifiLines.length?(wifiLines.length*lineH+textPad*2):0;
   canvas.width=realSize;canvas.height=realSize+extraH;
   const ctx=canvas.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle=fg;
@@ -551,7 +1105,7 @@ function renderDuitNowGen(raw){
   const border=Math.round(10*sc),pad=Math.round(24*sc),r=Math.round(12*sc);
   const cellSize=Math.max(1,Math.floor((W-border*2-pad*2)/modules));
   const qrPx=cellSize*modules;
-  const name=document.getElementById('dn-gen-name').value.trim()||'Merchant';
+  const name=document.getElementById('dn-gen-name').value.trim()||t('dn_default_merchant');
   const acqEl=document.getElementById('dn-gen-acquirer');
   const bank=acqEl.options[acqEl.selectedIndex]?.text?.replace(/\s*\(\d+\)\s*$/,'')||'';
   const nameFz=Math.max(10,Math.round(13*sc)),bankFz=Math.max(8,Math.round(11*sc));
@@ -605,9 +1159,9 @@ const MY_PROXY='';
 const CORS_PROXIES=[...(MY_PROXY?[u=>MY_PROXY+'?url='+encodeURIComponent(u)]:[]),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u),u=>'https://corsproxy.io/?'+encodeURIComponent(u)];
 async function ccFetchWithProxies(url){let img=await ccFetchImg(url);if(img)return img;try{return await Promise.any(CORS_PROXIES.map(p=>new Promise(async(res,rej)=>{const i=await ccFetchImg(p(url));i?res(i):rej()})))}catch{return null}}
 function ccImgLoad(src){return new Promise(res=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>i.naturalWidth<2?res(null):res(i);i.onerror=()=>res(null);i.src=src;setTimeout(()=>res(null),2500)})}
-async function ccLoadImg(url){const tab=ccActiveTab();if(tab==='upl'){if(!ccUploadedFile)throw'No image uploaded.';return await ccFileToImg(ccUploadedFile)}if(tab==='iu'){const u=document.getElementById('cc-iu').value.trim();if(!u)throw'Enter an image URL.';const img=await ccFetchWithProxies(u);if(img)return img;throw'Cannot load image. Try uploading instead.'}let d;try{d=new URL(url).hostname}catch{throw'Invalid URL'}
+async function ccLoadImg(url){const tab=ccActiveTab();if(tab==='upl'){if(!ccUploadedFile)throw t('cc_err_no_img');return await ccFileToImg(ccUploadedFile)}if(tab==='iu'){const u=document.getElementById('cc-iu').value.trim();if(!u)throw t('cc_err_enter_iu');const img=await ccFetchWithProxies(u);if(img)return img;throw t('cc_err_load_img')}let d;try{d=new URL(url).hostname}catch{throw t('cc_err_inv_url')}
 const sources=[`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${d}&size=256`,`https://www.google.com/s2/favicons?domain=${d}&sz=256`,`https://icons.duckduckgo.com/ip3/${d}.ico`,`https://logo.clearbit.com/${d}`,`https://${d}/apple-touch-icon.png`,`https://${d}/favicon.ico`];
-try{return await Promise.any(sources.map(s=>new Promise(async(res,rej)=>{const img=await ccImgLoad(s);if(img){try{const c=document.createElement('canvas');c.width=c.height=2;const cx=c.getContext('2d');cx.drawImage(img,0,0);cx.getImageData(0,0,1,1);return res(img)}catch{}}const f=await ccFetchWithProxies(s);f?res(f):rej()})))}catch{}throw`Cannot load favicon for ${d}. Try Upload or Image URL tab.`}
+try{return await Promise.any(sources.map(s=>new Promise(async(res,rej)=>{const img=await ccImgLoad(s);if(img){try{const c=document.createElement('canvas');c.width=c.height=2;const cx=c.getContext('2d');cx.drawImage(img,0,0);cx.getImageData(0,0,1,1);return res(img)}catch{}}const f=await ccFetchWithProxies(s);f?res(f):rej()})))}catch{}throw`${t('cc_err_fav_1')}${d}${t('cc_err_fav_2')}`}
 function ccFileToImg(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=r.result};r.onerror=rej;r.readAsDataURL(f)})}
 function ccExtractColors(img){const c=document.createElement('canvas');c.width=c.height=64;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,64,64);const d=ctx.getImageData(0,0,64,64).data;const bk={};for(let i=0;i<d.length;i+=4){if(d[i+3]<128)continue;const k=`${Math.round(d[i]/24)*24},${Math.round(d[i+1]/24)*24},${Math.round(d[i+2]/24)*24}`;bk[k]=(bk[k]||0)+1}return Object.entries(bk).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k])=>{const[r,g,b]=k.split(',').map(Number);return{r,g,b}})}
 function ccImgToGrid(img,sz){const c=document.createElement('canvas');c.width=c.height=sz;const ctx=c.getContext('2d');const iw=img.naturalWidth,ih=img.naturalHeight,sc=Math.max(sz/iw,sz/ih),sw=iw*sc,sh=ih*sc;ctx.drawImage(img,(sz-sw)/2,(sz-sh)/2,sw,sh);return ctx.getImageData(0,0,sz,sz)}
@@ -621,7 +1175,7 @@ function ccAutoTune(grid,sz){let minL=1,maxL=0,darkPx=0,lightPx=0;for(let r=0;r<
 function ccSetS(id,v,lid){document.getElementById(id).value=v;document.getElementById(lid).textContent=v+'%'}
 function ccRenderToCanvas(canvas,qr,sz,grid,outPx){const dMin=+document.getElementById('cc-dmn').value/100,dMax=+document.getElementById('cc-dmx').value/100,gStr=+document.getElementById('cc-gs').value/100,gThr=+document.getElementById('cc-gt').value/100,shape=document.getElementById('cc-shp').value,bgC=document.getElementById('cc-bgc').value,fd=ccHexRgb(document.getElementById('cc-fdc').value),useCol=document.getElementById('cc-col').checked;const ctx=canvas.getContext('2d');const q=2,tot=sz+q*2,cell=outPx/tot,mR=cell/2;ctx.fillStyle=bgC;ctx.fillRect(0,0,outPx,outPx);for(let row=0;row<sz;row++)for(let col=0;col<sz;col++){const isDk=qr.isDark(row,col),cx=(col+q+.5)*cell,cy=(row+q+.5)*cell,crit=ccIsCritical(row,col,sz),p=ccPx(grid,col,row),L=ccLum(p.r,p.g,p.b),dk=1-L;if(isDk){let r,color;if(crit){r=mR*.92;const dom=CCS.colors[0]||fd;const fc=useCol?{r:Math.round(dom.r*.8),g:Math.round(dom.g*.8),b:Math.round(dom.b*.8)}:fd;color=`rgb(${fc.r},${fc.g},${fc.b})`}else{r=mR*Math.max(dMin,Math.min(1.05,dMin+(dMax-dMin)*dk));if(useCol&&p.a>100){const bc=ccBoostColor(p.r,p.g,p.b,.3);if(L>.78){const m=(L-.78)/.22;color=`rgb(${Math.round(bc.r*(1-m*.75)+fd.r*m*.75)},${Math.round(bc.g*(1-m*.75)+fd.g*m*.75)},${Math.round(bc.b*(1-m*.75)+fd.b*m*.75)})`}else color=`rgb(${bc.r},${bc.g},${bc.b})`}else color=`rgb(${fd.r},${fd.g},${fd.b})`}ccDot(ctx,cx,cy,r,shape,color)}else if(!crit&&gStr>0&&dk>gThr){const nd=(dk-gThr)/(1-gThr),gc=mR*.35,r=Math.min(mR*.04+(gc*gStr-mR*.04)*Math.pow(nd,.55),gc);const bc=useCol&&p.a>100?ccBoostColor(p.r,p.g,p.b,.3):{r:fd.r,g:fd.g,b:fd.b};ccDot(ctx,cx,cy,r,shape,`rgb(${bc.r},${bc.g},${bc.b})`)}}}
 function ccDot(ctx,cx,cy,r,shape,color){ctx.fillStyle=color;if(shape==='circle'){ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill()}else if(shape==='rrect'){const rr=r*.35;ctx.beginPath();ctx.moveTo(cx-r+rr,cy-r);ctx.lineTo(cx+r-rr,cy-r);ctx.quadraticCurveTo(cx+r,cy-r,cx+r,cy-r+rr);ctx.lineTo(cx+r,cy+r-rr);ctx.quadraticCurveTo(cx+r,cy+r,cx+r-rr,cy+r);ctx.lineTo(cx-r+rr,cy+r);ctx.quadraticCurveTo(cx-r,cy+r,cx-r,cy+r-rr);ctx.lineTo(cx-r,cy-r+rr);ctx.quadraticCurveTo(cx-r,cy-r,cx-r+rr,cy-r);ctx.closePath();ctx.fill()}else ctx.fillRect(cx-r,cy-r,r*2,r*2)}
-async function generateChroma(){let url=document.getElementById('cc-url').value.trim();if(!url){ccStatus('Enter a URL',true);return}if(!/^https?:\/\//i.test(url)&&url.includes('.')){url='https://'+url;document.getElementById('cc-url').value=url}const btn=document.getElementById('cc-gen-btn');btn.disabled=true;btn.innerHTML='<span class="spin"></span> Generating…';ccStatus('Loading image…');try{const src=await ccLoadImg(url);const colors=ccExtractColors(src);CCS.colors=colors;CCS.label=(()=>{try{return new URL(url).hostname}catch{return'qr'}})();CCS.thumb=src.src||'';document.getElementById('cc-sth').src=CCS.thumb;document.getElementById('cc-sn').textContent=CCS.label;const pal=document.getElementById('cc-pal');pal.innerHTML='';colors.forEach(c=>{const d=document.createElement('div');d.className='sw';d.style.background=`rgb(${c.r},${c.g},${c.b})`;pal.appendChild(d)});document.getElementById('cc-srcinfo').style.display='flex';const ecc=document.getElementById('cc-ecc').value;CCS.versions=[];const car=document.getElementById('cc-carousel');car.innerHTML='';ccStatus('Building QR versions…');let tuned=false;for(let i=0;i<CC_VERSIONS.length;i++){const ver=CC_VERSIONS[i];let qr;try{qr=qrcode(ver,ecc);qr.addData(url);qr.make()}catch{try{qr=qrcode(0,ecc);qr.addData(url);qr.make()}catch{continue}}const sz=qr.getModuleCount(),grid=ccImgToGrid(src,sz);if(!tuned){ccAutoTune(grid,sz);tuned=true}const tc=document.createElement('canvas');tc.width=tc.height=128;ccRenderToCanvas(tc,qr,sz,grid,128);CCS.versions.push({qr,sz,grid,ver});const card=document.createElement('div');card.className='vcard'+(i===CCS.selectedIdx?' sel':'');card.innerHTML=`<div class="vthumb"></div><div class="vlabel">v${ver} · ${sz}×${sz}</div>`;card.querySelector('.vthumb').appendChild(tc);card.onclick=()=>ccSelectVersion(i);car.appendChild(card)}CCS.selectedIdx=Math.min(CCS.selectedIdx,CCS.versions.length-1);ccRenderSelected();document.getElementById('cc-preview-area').classList.add('on');ccStatus('')}catch(e){ccStatus('Error: '+e,true)}finally{btn.disabled=false;btn.textContent='Generate ChromaCode'}}
+async function generateChroma(){let url=document.getElementById('cc-url').value.trim();if(!url){ccStatus(t('cc_err_enter_url'),true);return}if(!/^https?:\/\//i.test(url)&&url.includes('.')){url='https://'+url;document.getElementById('cc-url').value=url}const btn=document.getElementById('cc-gen-btn');btn.disabled=true;btn.innerHTML='<span class="spin"></span> '+t('btn_cc_generating');ccStatus(t('cc_status_loading'));try{const src=await ccLoadImg(url);const colors=ccExtractColors(src);CCS.colors=colors;CCS.label=(()=>{try{return new URL(url).hostname}catch{return'qr'}})();CCS.thumb=src.src||'';document.getElementById('cc-sth').src=CCS.thumb;document.getElementById('cc-sn').textContent=CCS.label;const pal=document.getElementById('cc-pal');pal.innerHTML='';colors.forEach(c=>{const d=document.createElement('div');d.className='sw';d.style.background=`rgb(${c.r},${c.g},${c.b})`;pal.appendChild(d)});document.getElementById('cc-srcinfo').style.display='flex';const ecc=document.getElementById('cc-ecc').value;CCS.versions=[];const car=document.getElementById('cc-carousel');car.innerHTML='';ccStatus(t('cc_status_building'));let tuned=false;for(let i=0;i<CC_VERSIONS.length;i++){const ver=CC_VERSIONS[i];let qr;try{qr=qrcode(ver,ecc);qr.addData(url);qr.make()}catch{try{qr=qrcode(0,ecc);qr.addData(url);qr.make()}catch{continue}}const sz=qr.getModuleCount(),grid=ccImgToGrid(src,sz);if(!tuned){ccAutoTune(grid,sz);tuned=true}const tc=document.createElement('canvas');tc.width=tc.height=128;ccRenderToCanvas(tc,qr,sz,grid,128);CCS.versions.push({qr,sz,grid,ver});const card=document.createElement('div');card.className='vcard'+(i===CCS.selectedIdx?' sel':'');card.innerHTML=`<div class="vthumb"></div><div class="vlabel">v${ver} · ${sz}×${sz}</div>`;card.querySelector('.vthumb').appendChild(tc);card.onclick=()=>ccSelectVersion(i);car.appendChild(card)}CCS.selectedIdx=Math.min(CCS.selectedIdx,CCS.versions.length-1);ccRenderSelected();document.getElementById('cc-preview-area').classList.add('on');ccStatus('')}catch(e){ccStatus(t('cc_err_prefix')+e,true)}finally{btn.disabled=false;btn.textContent=t('btn_cc_gen')}}
 function ccSelectVersion(i){CCS.selectedIdx=i;document.querySelectorAll('#cc-carousel .vcard').forEach((c,j)=>c.classList.toggle('sel',j===i));ccRenderSelected()}
 function ccRenderSelected(){const v=CCS.versions[CCS.selectedIdx];if(!v)return;const o=+document.getElementById('cc-osz').value,c=document.getElementById('cc-main');c.width=c.height=o;ccRenderToCanvas(c,v.qr,v.sz,v.grid,o)}
 ['cc-dmn','cc-dmx','cc-gs','cc-gt'].forEach(id=>{const vm={'cc-dmn':'cc-vdmn','cc-dmx':'cc-vdmx','cc-gs':'cc-vgs','cc-gt':'cc-vgt'};document.getElementById(id).oninput=()=>{document.getElementById(vm[id]).textContent=document.getElementById(id).value+'%';ccRenderSelected()}});
@@ -647,12 +1201,12 @@ scanDz.ondragleave=()=>scanDz.classList.remove('ov');
 scanDz.ondrop=e=>{e.preventDefault();scanDz.classList.remove('ov');scanFile(e.dataTransfer.files[0])};
 scanFi.onchange=e=>scanFile(e.target.files[0]);
 
-function scanFile(f){if(!f||!f.type.startsWith('image/'))return;if(typeof jsQR==='undefined'){document.getElementById('scan-dp').innerHTML='<span style="color:var(--warn)">Scanner loading…try again in a moment</span>';return}const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const c=document.getElementById('scan-canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const ctx=c.getContext('2d');ctx.drawImage(img,0,0);const id=ctx.getImageData(0,0,c.width,c.height);const code=jsQR(id.data,c.width,c.height,{inversionAttempts:'attemptBoth'});if(code){showScanResult(code.data);document.getElementById('scan-dp').innerHTML=`<img class="preview" src="${r.result}" style="max-width:80px;max-height:80px"><br><span class="fname" style="color:var(--ok)">✓ QR code found</span>`}else document.getElementById('scan-dp').innerHTML=`<span style="color:var(--err)">✕ No QR code detected</span><br><span class="fname">Try a clearer image</span>`};img.src=r.result};r.readAsDataURL(f)}
+function scanFile(f){if(!f||!f.type.startsWith('image/'))return;if(typeof jsQR==='undefined'){document.getElementById('scan-dp').innerHTML=`<span style="color:var(--warn)">${t('scan_loading')}</span>`;return}const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const c=document.getElementById('scan-canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const ctx=c.getContext('2d');ctx.drawImage(img,0,0);const id=ctx.getImageData(0,0,c.width,c.height);const code=jsQR(id.data,c.width,c.height,{inversionAttempts:'attemptBoth'});if(code){showScanResult(code.data);document.getElementById('scan-dp').innerHTML=`<img class="preview" src="${r.result}" style="max-width:80px;max-height:80px"><br><span class="fname" style="color:var(--ok)">${t('scan_found')}</span>`}else document.getElementById('scan-dp').innerHTML=`<span style="color:var(--err)">${t('scan_not_found')}</span><br><span class="fname">${t('scan_try_clearer')}</span>`};img.src=r.result};r.readAsDataURL(f)}
 
 // Camera
-async function toggleCamera(){if(camRunning){stopCamera();return}try{camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});document.getElementById('cam-video').srcObject=camStream;document.getElementById('cam-wrap').style.display='block';document.getElementById('cam-btn').textContent='⏹ Close Camera';camRunning=true;requestAnimationFrame(scanFrame)}catch(e){alert(e.name==='NotAllowedError'?'Camera permission denied. QR Studio needs camera access only to scan QR codes — no video is recorded or transmitted.':'Could not access camera: '+e.message)}}
-function stopCamera(){camRunning=false;if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}document.getElementById('cam-wrap').style.display='none';document.getElementById('cam-btn').textContent='📷 Open Camera'}
-function scanFrame(){if(!camRunning||typeof jsQR==='undefined')return;const v=document.getElementById('cam-video');if(v.readyState!==v.HAVE_ENOUGH_DATA){requestAnimationFrame(scanFrame);return}const c=document.getElementById('cam-canvas');c.width=v.videoWidth;c.height=v.videoHeight;const ctx=c.getContext('2d');ctx.drawImage(v,0,0);const code=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height,{inversionAttempts:'attemptBoth'});if(code){document.getElementById('cam-status').textContent='✓ Found!';document.getElementById('cam-status').style.background='rgba(34,197,94,.85)';showScanResult(code.data);setTimeout(()=>{if(camRunning){document.getElementById('cam-status').textContent='Scanning…';document.getElementById('cam-status').style.background='rgba(0,0,0,.7)';requestAnimationFrame(scanFrame)}},2000)}else requestAnimationFrame(scanFrame)}
+async function toggleCamera(){const errEl=document.getElementById('cam-err-msg');if(errEl)errEl.style.display='none';if(camRunning){stopCamera();return}try{camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});document.getElementById('cam-video').srcObject=camStream;document.getElementById('cam-wrap').style.display='block';document.getElementById('cam-btn').textContent=t('btn_cam_close');camRunning=true;requestAnimationFrame(scanFrame)}catch(e){if(errEl){errEl.textContent=e.name==='NotAllowedError'?t('cam_err_denied'):(t('cam_err_other')+e.message);errEl.style.display='block'}}}
+function stopCamera(){camRunning=false;if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}document.getElementById('cam-wrap').style.display='none';document.getElementById('cam-btn').textContent=t('btn_cam_open')}
+function scanFrame(){if(!camRunning||typeof jsQR==='undefined')return;const v=document.getElementById('cam-video');if(v.readyState!==v.HAVE_ENOUGH_DATA){requestAnimationFrame(scanFrame);return}const c=document.getElementById('cam-canvas');c.width=v.videoWidth;c.height=v.videoHeight;const ctx=c.getContext('2d');ctx.drawImage(v,0,0);const code=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height,{inversionAttempts:'attemptBoth'});if(code){document.getElementById('cam-status').textContent=t('msg_cam_found');document.getElementById('cam-status').style.background='rgba(34,197,94,.85)';showScanResult(code.data);setTimeout(()=>{if(camRunning){document.getElementById('cam-status').textContent=t('msg_cam_scanning');document.getElementById('cam-status').style.background='rgba(0,0,0,.7)';requestAnimationFrame(scanFrame)}},2000)}else requestAnimationFrame(scanFrame)}
 
 // ═══════ EMV / DUITNOW DECODER ═══════
 function parseEMV(s){const r={};let i=0;while(i<s.length-4){const id=s.substr(i,2),len=parseInt(s.substr(i+2,2),10);if(isNaN(len)||i+4+len>s.length)break;const val=s.substr(i+4,len);r[id]=val;i+=4+len}return r}
@@ -724,40 +1278,41 @@ function parseDuitNow(emv,raw){
   const convFeeFixed=emv['56'];
   const convFeePct=emv['57'];
 
+  const zh=curLang==='zh';
   // Parse additional data (ID 62) — expanded per PayNet spec
   let addlHtml='';
   if(emv['62']){
     const addl=parseEMVNested(emv['62']);
-    const addlFields={'01':'Bill Number','02':'Mobile Number','03':'Store Label','04':'Loyalty Number','05':'Reference Label','06':'Customer Label','07':'Terminal Label','08':'Purpose of Transaction','09':'Consumer Data Request','10':'Merchant Tax ID','90':'RRN (Ref-1)','91':'RRN2 (Ref-2)','92':'Geo Coordinates'};
+    const addlFields=zh?{'01':'账单编号','02':'手机号码','03':'门店标签','04':'会员卡号','05':'参考标签','06':'客户标签','07':'终端标签','08':'交易用途','09':'客户数据请求','10':'商户税号','90':'RRN (参考号 1)','91':'RRN2 (参考号 2)','92':'地理坐标'}:{'01':'Bill Number','02':'Mobile Number','03':'Store Label','04':'Loyalty Number','05':'Reference Label','06':'Customer Label','07':'Terminal Label','08':'Purpose of Transaction','09':'Consumer Data Request','10':'Merchant Tax ID','90':'RRN (Ref-1)','91':'RRN2 (Ref-2)','92':'Geo Coordinates'};
     for(const[k,label]of Object.entries(addlFields)){if(addl[k])addlHtml+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">${label}</span><span style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${addl[k]}</span></div>`}
     // Decode Merchant Channel (ID 11) per PayNet spec Tables 3-5
     if(addl['11']){
       const ch=addl['11'];
-      const mediaMap={'0':'Print — Sticker','1':'Print — Bill/Invoice','2':'Print — Magazine/Poster','3':'Print — Others','4':'Screen — POS/POI','5':'Screen — Website','6':'Screen — App','7':'Screen — Others'};
-      const locMap={'0':'At merchant premises','1':'Not at merchant premises','2':'Remote commerce','3':'Others'};
-      const presMap={'0':'Attended POS','1':'Unattended','2':'Semi-attended (self-checkout)','3':'Others'};
+      const mediaMap=zh?{'0':'印刷 — 贴纸','1':'印刷 — 账单/发票','2':'印刷 — 杂志/海报','3':'印刷 — 其他','4':'屏幕 — POS/终端','5':'屏幕 — 网站','6':'屏幕 — 应用','7':'屏幕 — 其他'}:{'0':'Print — Sticker','1':'Print — Bill/Invoice','2':'Print — Magazine/Poster','3':'Print — Others','4':'Screen — POS/POI','5':'Screen — Website','6':'Screen — App','7':'Screen — Others'};
+      const locMap=zh?{'0':'商户营业场所内','1':'商户营业场所外','2':'远程商业','3':'其他'}:{'0':'At merchant premises','1':'Not at merchant premises','2':'Remote commerce','3':'Others'};
+      const presMap=zh?{'0':'有人值守 POS','1':'无人值守','2':'半自助结账','3':'其他'}:{'0':'Attended POS','1':'Unattended','2':'Semi-attended (self-checkout)','3':'Others'};
       let chDesc=[];
       if(ch[0]&&mediaMap[ch[0]])chDesc.push(mediaMap[ch[0]]);
       if(ch[1]&&locMap[ch[1]])chDesc.push(locMap[ch[1]]);
       if(ch[2]&&presMap[ch[2]])chDesc.push(presMap[ch[2]]);
-      addlHtml+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">Merchant Channel</span><span style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${ch} — ${chDesc.join(' · ')||'Unknown'}</span></div>`;
+      addlHtml+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">${zh?'商户渠道':'Merchant Channel'}</span><span style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${ch} — ${chDesc.join(' · ')||(zh?'未知':'Unknown')}</span></div>`;
     }
   }
 
   // Data Integrity Check (ID 82)
   const dataHash=emv['82'];
   let hashHtml='';
-  if(dataHash){hashHtml=`<div style="margin-top:8px;font-size:.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Data Integrity</div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">SHA-256 Hash</span><span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;word-break:break-all;max-width:60%;text-align:right;color:var(--ok)">🔒 ${dataHash}</span></div>`}
+  if(dataHash){hashHtml=`<div style="margin-top:8px;font-size:.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">${zh?'数据完整性':'Data Integrity'}</div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">${zh?'SHA-256 哈希值':'SHA-256 Hash'}</span><span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;word-break:break-all;max-width:60%;text-align:right;color:var(--ok)">🔒 ${dataHash}</span></div>`}
 
   // Parse language template (ID 64)
   let langHtml='';
   if(emv['64']){
     const lang=parseEMVNested(emv['64']);
     if(lang['00']||lang['01']||lang['02']){
-      langHtml='<div style="margin-top:8px;font-size:.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Alternate Language</div>';
-      if(lang['00'])langHtml+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">Language</span><span style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${lang['00']}</span></div>`;
-      if(lang['01'])langHtml+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">Merchant Name</span><span style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${lang['01']}</span></div>`;
-      if(lang['02'])langHtml+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">Merchant City</span><span style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${lang['02']}</span></div>`;
+      langHtml=`<div style="margin-top:8px;font-size:.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">${zh?'备用语言信息':'Alternate Language'}</div>`;
+      if(lang['00'])langHtml+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">${zh?'语言':'Language'}</span><span style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${lang['00']}</span></div>`;
+      if(lang['01'])langHtml+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">${zh?'商户名称':'Merchant Name'}</span><span style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${lang['01']}</span></div>`;
+      if(lang['02'])langHtml+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">${zh?'商户城市':'Merchant City'}</span><span style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${lang['02']}</span></div>`;
     }
   }
 
@@ -767,32 +1322,33 @@ function parseDuitNow(emv,raw){
 
   const row=(label,val,raw,highlight)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3);flex-shrink:0">${label}</span><span style="font-family:'JetBrains Mono',monospace;font-size:.8rem;text-align:right;${highlight?'color:var(--accent);font-weight:600':''}">${val}${raw?` <span style="opacity:.45;font-size:.68rem">(${raw})</span>`:''}</span></div>`;
 
+  const wDisp=wallet==='Unknown'?(zh?'未知':'Unknown'):wallet;
   let html='';
-  html+=row('QR Type',`<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:.72rem;font-weight:600;background:${isStatic?'var(--ok)':'var(--warn)'};color:#fff">${isStatic?'STATIC — reusable':'DYNAMIC — one-time'}</span>`,initMethod);
+  html+=row(zh?'二维码类型':'QR Type',`<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:.72rem;font-weight:600;background:${isStatic?'var(--ok)':'var(--warn)'};color:#fff">${isStatic?(zh?'静态码 — 可重复使用':'STATIC — reusable'):(zh?'动态码 — 一次性使用':'DYNAMIC — one-time')}</span>`,initMethod);
   const isJomPAY=acquirer==='898989';
-  html+=row('Payment Network',isJomPAY?'JomPAY 🇲🇾':'DuitNow 🇲🇾','A0000006150001');
-  html+=row('Wallet / Bank',wallet,null,true);
-  html+=row('Merchant Name',name||'—',null,true);
-  html+=row('City',city||'—');
-  if(postal)html+=row('Postal Code',postal);
-  html+=row('Country',country||'—');
-  html+=row('Currency',currLabel,currency);
-  if(amount)html+=row('Amount','RM '+parseFloat(amount).toFixed(2),amount,true);
-  else html+=row('Amount','<span style="color:var(--text3);font-style:italic">Customer enters amount</span>');
-  if(tipIndicator==='01')html+=row('Tip','<span style="color:var(--text3);font-style:italic">Consumer prompted for tip</span>','ID 55=01');
-  if(tipIndicator==='02'&&convFeeFixed)html+=row('Convenience Fee','RM '+parseFloat(convFeeFixed).toFixed(2),'ID 56',true);
-  if(tipIndicator==='03'&&convFeePct)html+=row('Convenience Fee',convFeePct+'%','ID 57');
-  html+=row('Category',mccLabel,mcc);
-  html+=row(isJomPAY?'Biller Code':'Account / QR ID',`<span style="font-size:.72rem;word-break:break-all">${account}</span>`);
-  html+=row('Acquirer',`${wallet!=='Unknown'?wallet+' <span style="opacity:.5;font-size:.68rem">('+acquirer+')</span>':acquirer}`,null,true);
-  if(descriptor)html+=row('Merchant Descriptor',descriptor,'ID 26.03');
-  if(merchantMobile)html+=row('Merchant Mobile',merchantMobile,'ID 26.04');
-  if(ref&&!descriptor)html+=row('Descriptor / Ref',ref,'ID 26.03');
-  html+=row('CRC Checksum',`<span style="color:${crc.valid?'var(--ok)':'var(--err)'};font-weight:600">${crc.given} ${crc.valid?'✓ Valid':'✕ Invalid (expected '+crc.calc+')'}</span>`);
-  if(addlHtml)html+='<div style="margin-top:8px;font-size:.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Additional Data</div>'+addlHtml;
+  html+=row(zh?'支付网络':'Payment Network',isJomPAY?'JomPAY 🇲🇾':'DuitNow 🇲🇾','A0000006150001');
+  html+=row(zh?'电子钱包 / 银行':'Wallet / Bank',wDisp,null,true);
+  html+=row(zh?'商户名称':'Merchant Name',name||'—',null,true);
+  html+=row(zh?'城市':'City',city||'—');
+  if(postal)html+=row(zh?'邮政编码':'Postal Code',postal);
+  html+=row(zh?'国家/地区':'Country',country||'—');
+  html+=row(zh?'币种':'Currency',currLabel,currency);
+  if(amount)html+=row(zh?'金额':'Amount','RM '+parseFloat(amount).toFixed(2),amount,true);
+  else html+=row(zh?'金额':'Amount',`<span style="color:var(--text3);font-style:italic">${zh?'由付款人输入金额':'Customer enters amount'}</span>`);
+  if(tipIndicator==='01')html+=row(zh?'小费':'Tip',`<span style="color:var(--text3);font-style:italic">${zh?'提示付款人输入小费':'Consumer prompted for tip'}</span>`,'ID 55=01');
+  if(tipIndicator==='02'&&convFeeFixed)html+=row(zh?'便利费 / 手续费':'Convenience Fee','RM '+parseFloat(convFeeFixed).toFixed(2),'ID 56',true);
+  if(tipIndicator==='03'&&convFeePct)html+=row(zh?'便利费 / 手续费':'Convenience Fee',convFeePct+'%','ID 57');
+  html+=row(zh?'商户类别':'Category',mccLabel,mcc);
+  html+=row(isJomPAY?(zh?'账单机构代码':'Biller Code'):(zh?'账户 / 二维码 ID':'Account / QR ID'),`<span style="font-size:.72rem;word-break:break-all">${account}</span>`);
+  html+=row(zh?'收单机构':'Acquirer',`${wallet!=='Unknown'?wallet+' <span style="opacity:.5;font-size:.68rem">('+acquirer+')</span>':acquirer}`,null,true);
+  if(descriptor)html+=row(zh?'商户描述':'Merchant Descriptor',descriptor,'ID 26.03');
+  if(merchantMobile)html+=row(zh?'商户手机号':'Merchant Mobile',merchantMobile,'ID 26.04');
+  if(ref&&!descriptor)html+=row(zh?'描述 / 参考号':'Descriptor / Ref',ref,'ID 26.03');
+  html+=row(zh?'CRC 校验码':'CRC Checksum',`<span style="color:${crc.valid?'var(--ok)':'var(--err)'};font-weight:600">${crc.given} ${crc.valid?(zh?'✓ 校验通过':'✓ Valid'):(zh?'✕ 校验失败（应为 '+crc.calc+'）':'✕ Invalid (expected '+crc.calc+')')}</span>`);
+  if(addlHtml)html+=`<div style="margin-top:8px;font-size:.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">${zh?'附加数据':'Additional Data'}</div>`+addlHtml;
   if(langHtml)html+=langHtml;
   if(hashHtml)html+=hashHtml;
-  html+=`<button class="gen-btn" style="margin-top:16px" onclick="document.getElementById('dn-edit-name').value=window._dnName||'';document.getElementById('dn-edit-bank').value=window._dnWallet||'';regenDuitNow();document.getElementById('duitnow-regen').scrollIntoView({behavior:'smooth',block:'nearest'})">🔄 Regenerate Clean QR Code</button>`;
+  html+=`<button class="gen-btn" style="margin-top:16px" onclick="document.getElementById('dn-edit-name').value=window._dnName||'';document.getElementById('dn-edit-bank').value=window._dnWallet||'';regenDuitNow();document.getElementById('duitnow-regen').scrollIntoView({behavior:'smooth',block:'nearest'})">${zh?'🔄 重新生成高清二维码':'🔄 Regenerate Clean QR Code'}</button>`;
 
   // Store for regen
   window._dnRaw=raw;window._dnName=name;window._dnWallet=wallet;
@@ -800,7 +1356,7 @@ function parseDuitNow(emv,raw){
   return html;
 }
 
-function showScanResult(data){scanResultData=data;document.getElementById('scan-result').style.display='block';document.getElementById('scan-content').textContent=data;const type=detectQRType(data);document.getElementById('scan-type-badge').textContent=type.label;
+function showScanResult(data,noScroll){scanResultData=data;document.getElementById('scan-result').style.display='block';document.getElementById('scan-content').textContent=data;const type=detectQRType(data);document.getElementById('scan-type-badge').textContent=type.label;
 
 // DuitNow/EMV breakdown
 const dnCard=document.getElementById('duitnow-card');
@@ -813,31 +1369,32 @@ if(type.type==='emvpay'){
   }else dnCard.style.display='none';
 }else dnCard.style.display='none';
 
-const ob=document.getElementById('scan-open-btn');if(type.type==='url'){ob.style.display='inline-flex';ob.textContent='🔗 Open Link';ob.onclick=()=>window.open(data,'_blank')}else if(type.type==='phone'){ob.style.display='inline-flex';ob.textContent='📞 Call';ob.onclick=()=>window.open(data,'_blank')}else if(type.type==='email'){ob.style.display='inline-flex';ob.textContent='✉️ Email';ob.onclick=()=>window.open(data,'_blank')}else if(type.type==='whatsapp'){ob.style.display='inline-flex';ob.textContent='💬 WhatsApp';ob.onclick=()=>window.open(data,'_blank')}else ob.style.display='none';
+const ob=document.getElementById('scan-open-btn');if(type.type==='url'){ob.style.display='inline-flex';ob.textContent=t('btn_open_link');ob.onclick=()=>window.open(data,'_blank')}else if(type.type==='phone'){ob.style.display='inline-flex';ob.textContent=t('btn_call');ob.onclick=()=>window.open(data,'_blank')}else if(type.type==='email'){ob.style.display='inline-flex';ob.textContent=t('btn_email');ob.onclick=()=>window.open(data,'_blank')}else if(type.type==='whatsapp'){ob.style.display='inline-flex';ob.textContent=t('btn_whatsapp');ob.onclick=()=>window.open(data,'_blank')}else ob.style.display='none';
 const safety=analyzeQRSafety(data,type),el=document.getElementById('scan-safety'),card=document.getElementById('scan-safety-card');
-if(safety.level==='safe'){card.style.borderColor='var(--ok)';el.innerHTML=`<div style="color:var(--ok);font-weight:600;font-size:.9rem">✅ Looks Safe</div><div style="font-size:.78rem;color:var(--text2);margin-top:6px">${safety.detail}</div>`}
-else if(safety.level==='warning'){card.style.borderColor='var(--warn)';el.innerHTML=`<div style="color:var(--warn);font-weight:600;font-size:.9rem">⚠️ Caution</div><div style="font-size:.78rem;color:var(--text2);margin-top:6px">${safety.detail}</div>`}
-else{card.style.borderColor='var(--err)';el.innerHTML=`<div style="color:var(--err);font-weight:600;font-size:.9rem">🚨 Suspicious — Be Careful</div><div style="font-size:.78rem;color:var(--text2);margin-top:6px">${safety.detail}</div>`}
-document.getElementById('scan-result').scrollIntoView({behavior:'smooth',block:'nearest'})}
+const zh=curLang==='zh';
+if(safety.level==='safe'){card.style.borderColor='var(--ok)';el.innerHTML=`<div style="color:var(--ok);font-weight:600;font-size:.9rem">${zh?'✅ 看起来安全':'✅ Looks Safe'}</div><div style="font-size:.78rem;color:var(--text2);margin-top:6px">${safety.detail}</div>`}
+else if(safety.level==='warning'){card.style.borderColor='var(--warn)';el.innerHTML=`<div style="color:var(--warn);font-weight:600;font-size:.9rem">${zh?'⚠️ 请注意':'⚠️ Caution'}</div><div style="font-size:.78rem;color:var(--text2);margin-top:6px">${safety.detail}</div>`}
+else{card.style.borderColor='var(--err)';el.innerHTML=`<div style="color:var(--err);font-weight:600;font-size:.9rem">${zh?'🚨 可疑内容 — 请谨慎操作':'🚨 Suspicious — Be Careful'}</div><div style="font-size:.78rem;color:var(--text2);margin-top:6px">${safety.detail}</div>`}
+if(!noScroll)document.getElementById('scan-result').scrollIntoView({behavior:'smooth',block:'nearest'})}
 
-function detectQRType(d){if(/^https?:\/\/wa\.me\//i.test(d))return{type:'whatsapp',label:'WhatsApp'};if(/^https?:\/\//i.test(d))return{type:'url',label:'URL'};if(/^WIFI:/i.test(d))return{type:'wifi',label:'WiFi'};if(/^mailto:/i.test(d))return{type:'email',label:'Email'};if(/^tel:/i.test(d))return{type:'phone',label:'Phone'};if(/^sms:/i.test(d))return{type:'sms',label:'SMS'};if(/^geo:/i.test(d))return{type:'geo',label:'Location'};if(/^BEGIN:VCARD/i.test(d))return{type:'vcard',label:'vCard'};if(/^BEGIN:VCALENDAR/i.test(d))return{type:'calendar',label:'Calendar'};if(/^bitcoin:/i.test(d))return{type:'crypto',label:'Bitcoin'};if(/^ethereum:/i.test(d))return{type:'crypto',label:'Ethereum'};if(/^00020101/i.test(d)||/^00020201/i.test(d)){let isDN=false,isJP=false;try{const emv=parseEMV(d);for(let id=26;id<=51;id++){const k=id.toString().padStart(2,'0');if(emv[k]){const n=parseEMVNested(emv[k]);if(n['00']==='A0000006150001'){isDN=true;if(n['01']==='898989')isJP=true}}}}catch{}return{type:'emvpay',label:isJP?'JomPAY 🇲🇾':isDN?'DuitNow 🇲🇾':'EMV Payment'}};return{type:'text',label:'Text'}}
+function detectQRType(d){const zh=curLang==='zh';if(/^https?:\/\/wa\.me\//i.test(d))return{type:'whatsapp',label:'WhatsApp'};if(/^https?:\/\//i.test(d))return{type:'url',label:zh?'网址 (URL)':'URL'};if(/^WIFI:/i.test(d))return{type:'wifi',label:'WiFi'};if(/^mailto:/i.test(d))return{type:'email',label:zh?'邮箱':'Email'};if(/^tel:/i.test(d))return{type:'phone',label:zh?'电话':'Phone'};if(/^sms:/i.test(d))return{type:'sms',label:zh?'短信':'SMS'};if(/^geo:/i.test(d))return{type:'geo',label:zh?'位置':'Location'};if(/^BEGIN:VCARD/i.test(d))return{type:'vcard',label:zh?'名片 (vCard)':'vCard'};if(/^BEGIN:VCALENDAR/i.test(d))return{type:'calendar',label:zh?'日程':'Calendar'};if(/^bitcoin:/i.test(d))return{type:'crypto',label:zh?'比特币 (Bitcoin)':'Bitcoin'};if(/^ethereum:/i.test(d))return{type:'crypto',label:zh?'以太坊 (Ethereum)':'Ethereum'};if(/^00020101/i.test(d)||/^00020201/i.test(d)){let isDN=false,isJP=false;try{const emv=parseEMV(d);for(let id=26;id<=51;id++){const k=id.toString().padStart(2,'0');if(emv[k]){const n=parseEMVNested(emv[k]);if(n['00']==='A0000006150001'){isDN=true;if(n['01']==='898989')isJP=true}}}}catch{}return{type:'emvpay',label:isJP?'JomPAY 🇲🇾':isDN?'DuitNow 🇲🇾':(zh?'EMV 支付码':'EMV Payment')}};return{type:'text',label:zh?'文本':'Text'}}
 
-function analyzeQRSafety(data,type){const w=[],d=[];if(type.type==='url'){try{const u=new URL(data);if(u.protocol==='http:')w.push('Uses HTTP (unencrypted).');if(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(u.hostname))d.push('Raw IP address URL — common in phishing.');if(data.length>500)w.push('Unusually long URL.');const badTLDs=['.zip','.mov','.tk','.ml','.ga','.cf','.gq','.buzz','.top','.xyz'];if(badTLDs.some(t=>u.hostname.endsWith(t)))w.push(`Suspicious domain extension.`);const shorts=['bit.ly','tinyurl.com','t.co','goo.gl','ow.ly','is.gd','rb.gy','short.io','cutt.ly'];if(shorts.some(s=>u.hostname===s||u.hostname==='www.'+s))w.push('Shortened URL — real destination hidden.');if(u.protocol==='data:')d.push('Data URI — can execute code. Do NOT open.');if(u.protocol==='javascript:')d.push('JavaScript injection. Do NOT open.');if(/[^\x00-\x7F]/.test(u.hostname))d.push('Non-ASCII domain (homograph attack).');if(u.username||u.password)d.push('Embedded credentials — likely phishing.');if(data.includes('@')&&type.type==='url')w.push('URL contains @ — may redirect elsewhere.');if(d.length===0&&w.length===0)return{level:'safe',detail:`Domain: <strong>${u.hostname}</strong> · ${u.protocol==='https:'?'HTTPS encrypted':'HTTP unencrypted'} · No threats detected. Verify the domain before entering personal info.`}}catch{}}
-if(type.type==='wifi'){if(/P:;/.test(data)||/T:nopass/i.test(data)||/T:;/.test(data))w.push('Open WiFi — no password.');else return{level:'safe',detail:'Password-protected WiFi. Verify the network name before connecting.'}}
-if(type.type==='vcard')return{level:'safe',detail:'Contact card. Review details before saving.'};
-if(type.type==='calendar')return{level:'safe',detail:'Calendar event. Review before adding.'};
-if(type.type==='phone')return{level:'safe',detail:'Phone number. Verify before calling — premium numbers can charge high fees.'};
-if(type.type==='sms')w.push('SMS can pre-fill messages to premium numbers. Review before sending.');
-if(type.type==='email')return{level:'safe',detail:'Email link. Review recipient and content before sending.'};
-if(type.type==='emvpay'){const emv=parseEMV(data);let isDuitNow=false;for(let id=26;id<=51;id++){const k=id.toString().padStart(2,'0');if(emv[k]){const n=parseEMVNested(emv[k]);if(n['00']==='A0000006150001')isDuitNow=true}}if(isDuitNow){const name=emv['59']||'Unknown';return{level:'warning',detail:`DuitNow payment QR detected. Merchant: <strong>${name}</strong>. Verify this matches the person/business you intend to pay. Check the full breakdown below. Always confirm the amount in your banking app before approving.`}}return{level:'warning',detail:'Payment QR code detected. Only use from trusted merchants. Verify amount in your banking app.'}}
-if(type.type==='crypto')return{level:'warning',detail:'Crypto address. Double-check every character — transactions are irreversible.'};
-if(type.type==='text'&&!d.length&&!w.length)return{level:'safe',detail:'Plain text. No links or executable content.'};
+function analyzeQRSafety(data,type){const zh=curLang==='zh',w=[],d=[];if(type.type==='url'){try{const u=new URL(data);if(u.protocol==='http:')w.push(zh?'使用 HTTP 协议（未加密）。':'Uses HTTP (unencrypted).');if(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(u.hostname))d.push(zh?'直接使用 IP 地址的链接 — 常见于钓鱼攻击。':'Raw IP address URL — common in phishing.');if(data.length>500)w.push(zh?'网址长度异常。':'Unusually long URL.');const badTLDs=['.zip','.mov','.tk','.ml','.ga','.cf','.gq','.buzz','.top','.xyz'];if(badTLDs.some(t=>u.hostname.endsWith(t)))w.push(zh?'可疑的域名后缀。':'Suspicious domain extension.');const shorts=['bit.ly','tinyurl.com','t.co','goo.gl','ow.ly','is.gd','rb.gy','short.io','cutt.ly'];if(shorts.some(s=>u.hostname===s||u.hostname==='www.'+s))w.push(zh?'短链接 — 真实目标地址已隐藏。':'Shortened URL — real destination hidden.');if(u.protocol==='data:')d.push(zh?'Data URI — 可能执行恶意代码，请勿打开。':'Data URI — can execute code. Do NOT open.');if(u.protocol==='javascript:')d.push(zh?'JavaScript 注入代码，请勿打开。':'JavaScript injection. Do NOT open.');if(/[^\x00-\x7F]/.test(u.hostname))d.push(zh?'包含非 ASCII 字符的域名（同形异义字钓鱼风险）。':'Non-ASCII domain (homograph attack).');if(u.username||u.password)d.push(zh?'内嵌身份凭据 — 极可能是钓鱼链接。':'Embedded credentials — likely phishing.');if(data.includes('@')&&type.type==='url')w.push(zh?'网址包含 @ 符号 — 可能会重定向至其他网站。':'URL contains @ — may redirect elsewhere.');if(d.length===0&&w.length===0)return{level:'safe',detail:zh?`域名：<strong>${u.hostname}</strong> · ${u.protocol==='https:'?'HTTPS 已加密':'HTTP 未加密'} · 未检测到安全威胁。输入个人信息前请核实域名。`:`Domain: <strong>${u.hostname}</strong> · ${u.protocol==='https:'?'HTTPS encrypted':'HTTP unencrypted'} · No threats detected. Verify the domain before entering personal info.`}}catch{}}
+if(type.type==='wifi'){if(/P:;/.test(data)||/T:nopass/i.test(data)||/T:;/.test(data))w.push(zh?'开放式 WiFi — 无密码保护。':'Open WiFi — no password.');else return{level:'safe',detail:zh?'受密码保护的 WiFi 网络。连接前请核实网络名称。':'Password-protected WiFi. Verify the network name before connecting.'}}
+if(type.type==='vcard')return{level:'safe',detail:zh?'联系人电子名片。保存前请核对详细信息。':'Contact card. Review details before saving.'};
+if(type.type==='calendar')return{level:'safe',detail:zh?'日程事件。添加至日历前请核对详情。':'Calendar event. Review before adding.'};
+if(type.type==='phone')return{level:'safe',detail:zh?'电话号码。拨打前请核实 — 特殊计费号码可能产生高额费用。':'Phone number. Verify before calling — premium numbers can charge high fees.'};
+if(type.type==='sms')w.push(zh?'短信可能会向高收费号码预填内容，发送前请仔细核对。':'SMS can pre-fill messages to premium numbers. Review before sending.');
+if(type.type==='email')return{level:'safe',detail:zh?'邮件链接。发送前请检查收件人和邮件内容。':'Email link. Review recipient and content before sending.'};
+if(type.type==='emvpay'){const emv=parseEMV(data);let isDuitNow=false;for(let id=26;id<=51;id++){const k=id.toString().padStart(2,'0');if(emv[k]){const n=parseEMVNested(emv[k]);if(n['00']==='A0000006150001')isDuitNow=true}}if(isDuitNow){const name=emv['59']||(zh?'未知':'Unknown');return{level:'warning',detail:zh?`检测到 DuitNow 收款二维码。商户：<strong>${name}</strong>。请核实该名称与您打算付款的个人或商家一致，并查看下方完整解析。确认支付前请务必在银行应用中核对金额。`:`DuitNow payment QR detected. Merchant: <strong>${name}</strong>. Verify this matches the person/business you intend to pay. Check the full breakdown below. Always confirm the amount in your banking app before approving.`}}return{level:'warning',detail:zh?'检测到支付二维码。请仅向受信任的商户付款，并在银行应用中核实金额。':'Payment QR code detected. Only use from trusted merchants. Verify amount in your banking app.'}}
+if(type.type==='crypto')return{level:'warning',detail:zh?'加密货币地址。请仔细核对每一个字符 — 交易不可撤销。':'Crypto address. Double-check every character — transactions are irreversible.'};
+if(type.type==='text'&&!d.length&&!w.length)return{level:'safe',detail:zh?'纯文本内容，不包含链接或可执行代码。':'Plain text. No links or executable content.'};
 if(d.length)return{level:'danger',detail:d.concat(w).map(x=>'• '+x).join('<br>')};
 if(w.length)return{level:'warning',detail:w.map(x=>'• '+x).join('<br>')};
-return{level:'safe',detail:'No threats detected.'}}
+return{level:'safe',detail:zh?'未检测到安全威胁。':'No threats detected.'}}
 
-function copyScanResult(){navigator.clipboard.writeText(scanResultData).then(()=>{const b=document.querySelector('#scan-result .dl-btn');b.textContent='✓ Copied!';setTimeout(()=>b.textContent='📋 Copy',1500)})}
-function clearScan(){document.getElementById('scan-result').style.display='none';document.getElementById('duitnow-card').style.display='none';document.getElementById('duitnow-regen').style.display='none';document.getElementById('scan-dp').textContent='Drop image, tap to browse, or paste (Ctrl+V)';document.getElementById('scan-safety-card').style.borderColor='var(--border)';scanResultData='';scanFi.value=''}
+function copyScanResult(){copyTextSafe(scanResultData,()=>{const b=document.querySelector('#scan-result .dl-btn');b.textContent=t('btn_scan_copied');setTimeout(()=>b.textContent=t('btn_scan_copy'),1500)})}
+function clearScan(){document.getElementById('scan-result').style.display='none';document.getElementById('duitnow-card').style.display='none';document.getElementById('duitnow-regen').style.display='none';document.getElementById('scan-dp').textContent=t('lbl_scan_drop');document.getElementById('scan-safety-card').style.borderColor='var(--border)';scanResultData='';scanFi.value=''}
 
 // ═══════ DUITNOW REGEN (TukarQR) ═══════
 let dnTargetW=600;
@@ -894,7 +1451,7 @@ function regenDuitNow(){
   ctx.fillText('MALAYSIA NATIONAL QR',totalW/2,bannerY+Math.round(12*sc));
   // Show dimensions
   const cmW=(totalW/300*2.54).toFixed(1),cmH=(totalH/300*2.54).toFixed(1);
-  document.getElementById('dn-dimensions').textContent=`${totalW} × ${totalH}px · ${cmW} × ${cmH}cm at 300dpi`;
+  document.getElementById('dn-dimensions').textContent=`${totalW} × ${totalH}px · ${cmW} × ${cmH}cm ${curLang==='zh'?'(300dpi)':'at 300dpi'}`;
   document.getElementById('duitnow-regen').style.display='block';
 }
 function dlDuitNowPNG(){const c=document.getElementById('duitnow-canvas');c.toBlob(b=>{const a=document.createElement('a');a.download=`duitnow-${(window._dnName||'qr').replace(/\s+/g,'-').toLowerCase()}.png`;a.href=URL.createObjectURL(b);document.body.appendChild(a);a.click();a.remove()},'image/png')}
